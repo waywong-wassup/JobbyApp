@@ -2,3 +2,9 @@
 plugins {
     alias(libs.plugins.android.application) apply false
 }
+
+buildscript {
+    extra.apply {
+        set("room_version", "2.8.4")
+    }
+}
