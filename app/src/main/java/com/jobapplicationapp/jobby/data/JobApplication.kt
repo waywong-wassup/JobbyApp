@@ -1,6 +1,5 @@
-package com.jobapplicationapp.jobby.model
+package com.jobapplicationapp.jobby.data
 
-import kotlin.collections.listOf
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
