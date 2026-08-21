@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /*
- * Hard coding data for now as placeholder TODO - remove hardcoded data
+ * TODO - setup foreign key to user table for cloud DB later
  * Data class to represent the information user enter for a job application
  */
 @Entity(tableName = "JobApplication")
