@@ -13,6 +13,7 @@ data class JobApplication(
     val jobApplicationId: Int = 0,
     val jobTitle: String,
     val companyName: String,
+    val location: String?,
     val salary: Long?, // save as cents and convert to decimal points later
     val applicationURL: String?,
     val progress: String,
@@ -21,13 +22,12 @@ data class JobApplication(
     val jobType: String?,
     val applicationPostedDate: String?,
     val notes: String?
-)
+)  {
+    companion object {
+        val sampleJobApplication = listOf(
+        JobApplication(1,"Janitor", "Mom's basement","Auckland", 5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired"),
+        JobApplication(2,"Librarian","Library","Wellington",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
+        )
+    }
+}
 
-///*
-// * List of job applications TODO - remove hardcoded data
-// */
-//val jobApplications = listOf(
-//    JobApplication("Janitor", "Mom's basement", "5", "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired"),
-//    JobApplication("Librarian","Library", "5", "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired"
-//    )
-//)

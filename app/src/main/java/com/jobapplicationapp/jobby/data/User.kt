@@ -13,4 +13,9 @@ data class User(
     val userId: Int = 0,
     val firstName: String,
     val lastName: String
-)
+) {
+    companion object {
+        val sampleUser = User(1, "Harry", "Potter")
+
+    }
+}
