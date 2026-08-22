@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.jobapplicationapp.jobby.ui.JobApplicationListScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,5 +28,5 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun JobbyApp(modifier: Modifier = Modifier) {
-
+    JobApplicationListScreen(modifier = modifier)
 }
