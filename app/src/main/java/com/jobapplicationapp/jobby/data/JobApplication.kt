@@ -11,17 +11,17 @@ import androidx.room.PrimaryKey
 data class JobApplication(
     @PrimaryKey(autoGenerate = true)
     val jobApplicationId: Int = 0,
-    val jobTitle: String,
-    val companyName: String,
-    val location: String?,
-    val salary: Long?, // save as cents and convert to decimal points later
-    val applicationURL: String?,
-    val progress: String,
-    val contactName: String?,
-    val contactDetails: String?,
-    val jobType: String?,
-    val applicationPostedDate: String?,
-    val notes: String?
+    var jobTitle: String,
+    var companyName: String,
+    var location: String?,
+    var salary: Long?, // save as cents and convert to decimal points later
+    var applicationURL: String?,
+    var progress: String,
+    var contactName: String?,
+    var contactDetails: String?,
+    var jobType: String?,
+    var applicationPostedDate: String?,
+    var notes: String?
 )  {
     companion object {
         val sampleJobApplication = listOf(
