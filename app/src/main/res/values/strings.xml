@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">JobbyApp</string>
+    <string name="job_application_details">Job Application Details</string>
+    <string name="job_title">Job Title</string>
+    <string name="company_name">Company Name</string>
+    <string name="location">Location</string>
+    <string name="application_url">Application URL</string>
+    <string name="progress">Progress</string>
+    <string name="salary">Salary</string>
+    <string name="contact_name">Contact Name</string>
+    <string name="contact_details">Contact Details</string>
+    <string name="job_type">Job Type</string>
+    <string name="posted_date">Posted Date</string>
+    <string name="notes">Notes</string>
+    <string name="discard">Discard</string>
+    <string name="save">Save</string>
+    <string name="back_to_list">Back to Job applications</string>
+    <string name="add_job_application">Add Job Application</string>
 </resources>
