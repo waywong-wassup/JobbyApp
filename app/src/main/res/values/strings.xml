@@ -15,4 +15,5 @@
     <string name="discard">Discard</string>
     <string name="save">Save</string>
     <string name="back_to_list">Back to Job applications</string>
+    <string name="add_job_application">Add Job Application</string>
 </resources>

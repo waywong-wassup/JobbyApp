@@ -26,7 +26,7 @@ data class JobApplication(
     companion object {
         val sampleJobApplication = listOf(
         JobApplication(1,"Janitor", "Mom's basement","Auckland", 5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired"),
-        JobApplication(2,"Librarian","Library","Wellington",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
+        JobApplication(2,"Librarian","Library","",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
         )
     }
 }
