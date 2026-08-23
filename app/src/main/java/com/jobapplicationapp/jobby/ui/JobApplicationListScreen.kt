@@ -1,28 +1,33 @@
 package com.jobapplicationapp.jobby.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,9 +36,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.FlowPreview
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.User
@@ -42,7 +47,7 @@ import com.jobapplicationapp.jobby.data.User
 @Composable
 fun JobApplicationListScreen(modifier: Modifier = Modifier) {
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         topBar = {
             JobbyTopBar()
         }
@@ -70,41 +75,38 @@ fun JobbyAppIcon(modifier: Modifier = Modifier) {
 @Composable
 fun JobbyAppUserName(user: User, modifier: Modifier = Modifier) {
     Text(
-        text = user.firstName
-    )
-    Text(
-        text = " "
-    )
-    Text(
-        text = user.lastName
+        text = "${user.firstName} ${user.lastName}",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JobbyTopBar(){
-    Column (
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFDCD0FF))
-    ){
-        Text(
-            text = "Jobby",
-            modifier = Modifier
-                .padding(start = 8.dp, top = 8.dp)
+fun JobbyTopBar() {
+    TopAppBar(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                JobbyAppIcon()
+                Column {
+                    Text(
+                        text = "Jobby",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    JobbyAppUserName(user = User.sampleUser)
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color(0xFFDCD0FF)
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            JobbyAppIcon()
-            JobbyAppUserName(user = User.sampleUser,
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .weight(1F)
-            )
-        }
-    }
+    )
 }
 
 
@@ -116,10 +118,10 @@ fun JobApplicationList(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement =  Arrangement.spacedBy(16.dp)
-    ){
-        items(jobApplications.size){ index ->
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(jobApplications.size) { index ->
             JobApplicationCard(
                 jobApplication = jobApplications[index]
             )
@@ -127,57 +129,79 @@ fun JobApplicationList(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modifier) {
-    Card(
+    ElevatedCard(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.small,
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Row(modifier = Modifier.padding(8.dp)){
-            Column() {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = jobApplication.jobTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
-                Card {
-                    Row{
-                        Text(
-                            text = jobApplication.companyName
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = jobApplication.companyName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                // check if location is not null, when null, don't render this at all
+                if (jobApplication.location!!.isNotEmpty())
+                {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.outline
                         )
-                        if(jobApplication.location != null){
-                            Text(
-                                text = " • ${jobApplication.location}"
-                            )
-                        }
-
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = jobApplication.location!!,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
 
-            Column(modifier = Modifier
-                .padding(8.dp)
-                .wrapContentSize()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ){
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(32.dp)
+                ) {
                     Text(
                         text = jobApplication.progress,
-                        style = MaterialTheme.typography.bodyMedium
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
-                    IconButton(
-                        onClick = { /* Action */ },
-                        modifier = Modifier.size(24.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Job Application",
-                            tint = Color.Black,
-                            modifier = Modifier
-                                .size(18.dp)
-                                .padding(start = 4.dp)
-                        )
-                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = { },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Job Application",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }
@@ -203,8 +227,10 @@ private fun JobbyTopBarPreview() {
     JobbyTopBar()
 }
 
-@Preview
+@Preview(showBackground = true, heightDp = 400)
 @Composable
 fun JobApplicationListScreenPreview() {
-    JobApplicationListScreen()
+    MaterialTheme {
+        JobApplicationListScreen()
+    }
 }
