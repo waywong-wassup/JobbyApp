@@ -45,70 +45,9 @@ class JobApplicationViewModel (
     private val _changingJobApplication = MutableStateFlow<JobApplication?>(null)
     val changingJobApplication = _changingJobApplication.asStateFlow()
 
-    fun updateJobTitleFieldStates(newTitle: String) {
+    fun updateJobDetailFieldsUiStates(transform: JobApplication.() -> JobApplication) {
         _changingJobApplication.update {
-            it?.copy(jobTitle = newTitle)
-        }
-    }
-
-    fun updateCompanyNameFieldStates(newCompanyName: String) {
-        _changingJobApplication.update {
-            it?.copy(companyName = newCompanyName)
-        }
-
-    }
-
-    fun updateLocationFieldStates(newLocation: String) {
-        _changingJobApplication.update {
-            it?.copy(location = newLocation)
-        }
-    }
-
-    fun updateApplicationUrlFieldStates(newApplicationUrl: String) {
-        _changingJobApplication.update {
-            it?.copy(location = newApplicationUrl)
-        }
-    }
-
-    fun updateProgressFieldStates(newProgress: String) {
-        _changingJobApplication.update {
-            it?.copy(progress = newProgress)
-        }
-    }
-
-    fun updateSalaryFieldStates(newSalary: String) {
-        _changingJobApplication.update {
-            it?.copy(salary = newSalary.toLongOrNull())
-        }
-    }
-
-    fun updatePostedDateFieldStates(newPostedDate: String) {
-        _changingJobApplication.update {
-            it?.copy(applicationPostedDate = newPostedDate)
-        }
-    }
-
-    fun updateJobTypeFieldStates(newJobType: String) {
-        _changingJobApplication.update {
-            it?.copy(jobType = newJobType)
-        }
-    }
-
-    fun updateContactNameFieldStates(newContactName: String) {
-        _changingJobApplication.update {
-            it?.copy(contactName = newContactName)
-        }
-    }
-
-    fun updateContactDetailsFieldStates(newContactDetails: String) {
-        _changingJobApplication.update {
-            it?.copy(contactDetails = newContactDetails)
-        }
-    }
-
-    fun updateNotesFieldStates(newNotes: String) {
-        _changingJobApplication.update {
-            it?.copy(notes = newNotes)
+            currentJobApplication -> currentJobApplication?.transform()
         }
     }
 
