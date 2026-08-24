@@ -35,6 +35,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,14 +47,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.asStateFlow
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsScreen(
-    jobApplication: JobApplication,
+    jobApplicationViewModel: JobApplicationViewModel,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
@@ -60,6 +68,7 @@ fun JobApplicationDetailsScreen(
         },
         bottomBar = {
             JobApplicationDetailsBottomBar(
+                jobApplicationViewModel = jobApplicationViewModel,
                 onDiscardClick = onDiscardClick,
                 onSaveClick = onSaveClick
             )
@@ -67,7 +76,7 @@ fun JobApplicationDetailsScreen(
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         JobApplicationDetailsForm(
-            jobApplication = jobApplication,
+            jobApplicationViewModel = jobApplicationViewModel,
             modifier = Modifier.padding(innerPadding)
                 .fillMaxSize()
         )
@@ -101,6 +110,7 @@ fun JobApplicationDetailsTopBar(onBackClick: () -> Unit = {}) {
 
 @Composable
 fun JobApplicationDetailsBottomBar(
+    jobApplicationViewModel: JobApplicationViewModel,
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
@@ -120,7 +130,9 @@ fun JobApplicationDetailsBottomBar(
                 Text(text = stringResource(R.string.discard))
             }
             Button(
-                onClick = onSaveClick,
+                onClick = {
+                    jobApplicationViewModel.saveJobApplicationChange()
+                          },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -130,12 +142,18 @@ fun JobApplicationDetailsBottomBar(
     }
 }
 
+
+
+
 @Composable
 fun JobApplicationDetailsForm(
-    jobApplication: JobApplication,
+    jobApplicationViewModel: JobApplicationViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val job by jobApplicationViewModel.changingJobApplication.collectAsState()
+    val currentJob = job ?: return
+
     Column(
         modifier = modifier
             .verticalScroll(scrollState)
@@ -144,29 +162,29 @@ fun JobApplicationDetailsForm(
     ) {
         FormSection(title = "Job Information") {
             OutlinedTextField(
-                value = jobApplication.jobTitle,
-                onValueChange = { jobApplication.jobTitle = it },
+                value = currentJob.jobTitle,
+                onValueChange = { jobApplicationViewModel.updateJobTitleFieldStates(it) },
                 label = { Text(stringResource(R.string.job_title)) },
                 modifier = Modifier.fillMaxWidth(),
             )
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = jobApplication.companyName,
-                    onValueChange = { jobApplication.companyName = it },
+                    value = currentJob.companyName,
+                    onValueChange = { jobApplicationViewModel.updateCompanyNameFieldStates(it)},
                     label = { Text(stringResource(R.string.company_name)) },
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
-                    value = jobApplication.location ?: "",
-                    onValueChange = { jobApplication.location = it },
+                    value = currentJob.location ?: "",
+                    onValueChange = {jobApplicationViewModel.updateLocationFieldStates(it) },
                     label = { Text(stringResource(R.string.location)) },
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
                 )
             }
             OutlinedTextField(
-                value = jobApplication.applicationURL ?: "",
-                onValueChange = { jobApplication.applicationURL = it },
+                value = currentJob.applicationURL ?: "",
+                onValueChange = { jobApplicationViewModel.updateApplicationUrlFieldStates(it) },
                 label = { Text(stringResource(R.string.application_url)) },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
@@ -184,8 +202,8 @@ fun JobApplicationDetailsForm(
         FormSection(title = "Application Progress") {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = jobApplication.progress,
-                    onValueChange = { jobApplication.progress = it },
+                    value = currentJob.progress,
+                    onValueChange = { jobApplicationViewModel.updateProgressFieldStates(it)},
                     label = { Text(stringResource(R.string.progress)) },
                     trailingIcon = {
                         Icon(
@@ -196,8 +214,8 @@ fun JobApplicationDetailsForm(
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
-                    value = jobApplication.salary?.toString() ?: "",
-                    onValueChange = { jobApplication.salary = it.toLongOrNull() },
+                    value = currentJob.salary?.toString() ?: "",
+                    onValueChange = { jobApplicationViewModel.updateSalaryFieldStates(it) },
                     label = { Text(stringResource(R.string.salary)) },
                     modifier = Modifier.weight(1f),
                     prefix = { Text("$") }
@@ -205,20 +223,20 @@ fun JobApplicationDetailsForm(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
                 OutlinedTextField(
-                    value = jobApplication.applicationPostedDate ?: "",
+                    value = currentJob.applicationPostedDate ?: "",
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.DateRange,
                             contentDescription = null
                         )
                     },
-                    onValueChange = { jobApplication.applicationPostedDate = it },
+                    onValueChange = {jobApplicationViewModel.updatePostedDateFieldStates(it)},
                     label = { Text(stringResource(R.string.posted_date)) },
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
-                    value = jobApplication.jobType ?: "",
-                    onValueChange = { jobApplication.jobType = it },
+                    value = currentJob.jobType ?: "",
+                    onValueChange = {jobApplicationViewModel.updateJobTypeFieldStates(it) },
                     label = { Text(stringResource(R.string.job_type)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -228,15 +246,15 @@ fun JobApplicationDetailsForm(
         FormSection(title = "Contact Information") {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = jobApplication.contactName ?: "",
-                    onValueChange = { jobApplication.contactName = it },
+                    value = currentJob.contactName ?: "",
+                    onValueChange = { jobApplicationViewModel.updateContactNameFieldStates(it) },
                     label = { Text(stringResource(R.string.contact_name)) },
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
                 )
                 OutlinedTextField(
-                    value = jobApplication.contactDetails ?: "",
-                    onValueChange = { jobApplication.contactDetails = it },
+                    value = currentJob.contactDetails ?: "",
+                    onValueChange = { jobApplicationViewModel.updateContactDetailsFieldStates(it) },
                     label = { Text(stringResource(R.string.contact_details)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -245,8 +263,8 @@ fun JobApplicationDetailsForm(
 
         FormSection(title = "Additional Notes") {
             OutlinedTextField(
-                value = jobApplication.notes ?: "",
-                onValueChange = { jobApplication.notes = it },
+                value = currentJob.notes ?: "",
+                onValueChange = { jobApplicationViewModel.updateNotesFieldStates(it) },
                 label = { Text(stringResource(R.string.notes)) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -279,15 +297,24 @@ fun FormSection(
     }
 }
 
-//@Preview
-@Composable
-fun JobApplicationDetailsFormPreview(){
-    JobApplicationDetailsForm(jobApplication = JobApplication.sampleJobApplication[0])
+class DummyRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
+    override fun getAllJobApplications() = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+    override suspend fun addJobApplication(job: JobApplication) {}
+    override suspend fun updateJobApplication(job: JobApplication) {}
+    override suspend fun deleteJobApplication(job: JobApplication) {}
 }
 
 @Preview (showBackground = true)
 @Composable
-fun JobApplicationDetailsScreenPreview(){
-    JobApplicationDetailsScreen(jobApplication = JobApplication.sampleJobApplication[0])
+fun JobApplicationDetailsScreenPreview() {
+    val dummyViewModel = remember {
+        JobApplicationViewModel(DummyRepository()).apply {
+
+            selectJob(JobApplication.sampleJobApplication[1])
+        }
+    }
+    MaterialTheme {
+        JobApplicationDetailsScreen(jobApplicationViewModel = dummyViewModel)
+    }
 }
 
