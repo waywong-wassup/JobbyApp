@@ -163,20 +163,20 @@ fun JobApplicationDetailsForm(
         FormSection(title = "Job Information") {
             OutlinedTextField(
                 value = currentJob.jobTitle,
-                onValueChange = { jobApplicationViewModel.updateJobTitleFieldStates(it) },
+                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobTitle = it) } },
                 label = { Text(stringResource(R.string.job_title)) },
                 modifier = Modifier.fillMaxWidth(),
             )
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = currentJob.companyName,
-                    onValueChange = { jobApplicationViewModel.updateCompanyNameFieldStates(it)},
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(companyName = it) } },
                     label = { Text(stringResource(R.string.company_name)) },
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
                     value = currentJob.location ?: "",
-                    onValueChange = {jobApplicationViewModel.updateLocationFieldStates(it) },
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(location = it) } },
                     label = { Text(stringResource(R.string.location)) },
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
@@ -184,7 +184,7 @@ fun JobApplicationDetailsForm(
             }
             OutlinedTextField(
                 value = currentJob.applicationURL ?: "",
-                onValueChange = { jobApplicationViewModel.updateApplicationUrlFieldStates(it) },
+                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(applicationURL = it) } },
                 label = { Text(stringResource(R.string.application_url)) },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
@@ -203,7 +203,7 @@ fun JobApplicationDetailsForm(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = currentJob.progress,
-                    onValueChange = { jobApplicationViewModel.updateProgressFieldStates(it)},
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(progress = it) } },
                     label = { Text(stringResource(R.string.progress)) },
                     trailingIcon = {
                         Icon(
@@ -215,7 +215,7 @@ fun JobApplicationDetailsForm(
                 )
                 OutlinedTextField(
                     value = currentJob.salary?.toString() ?: "",
-                    onValueChange = { jobApplicationViewModel.updateSalaryFieldStates(it) },
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = it.toLongOrNull()) } },
                     label = { Text(stringResource(R.string.salary)) },
                     modifier = Modifier.weight(1f),
                     prefix = { Text("$") }
@@ -230,13 +230,13 @@ fun JobApplicationDetailsForm(
                             contentDescription = null
                         )
                     },
-                    onValueChange = {jobApplicationViewModel.updatePostedDateFieldStates(it)},
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(applicationPostedDate = it) } },
                     label = { Text(stringResource(R.string.posted_date)) },
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
                     value = currentJob.jobType ?: "",
-                    onValueChange = {jobApplicationViewModel.updateJobTypeFieldStates(it) },
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobType = it) } },
                     label = { Text(stringResource(R.string.job_type)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -247,14 +247,14 @@ fun JobApplicationDetailsForm(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = currentJob.contactName ?: "",
-                    onValueChange = { jobApplicationViewModel.updateContactNameFieldStates(it) },
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(contactName = it) } },
                     label = { Text(stringResource(R.string.contact_name)) },
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
                 )
                 OutlinedTextField(
                     value = currentJob.contactDetails ?: "",
-                    onValueChange = { jobApplicationViewModel.updateContactDetailsFieldStates(it) },
+                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(contactDetails = it) } },
                     label = { Text(stringResource(R.string.contact_details)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -264,7 +264,7 @@ fun JobApplicationDetailsForm(
         FormSection(title = "Additional Notes") {
             OutlinedTextField(
                 value = currentJob.notes ?: "",
-                onValueChange = { jobApplicationViewModel.updateNotesFieldStates(it) },
+                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(notes = it) } },
                 label = { Text(stringResource(R.string.notes)) },
                 modifier = Modifier
                     .fillMaxWidth()
