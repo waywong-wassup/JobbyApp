@@ -29,6 +29,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,23 +42,38 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.compose.rememberNavController
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.User
 
 
 @Composable
-fun JobApplicationListScreen(modifier: Modifier = Modifier) {
+fun JobApplicationListScreen(
+    viewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory), modifier: Modifier = Modifier, onEditClick: (Int) -> Unit = {}
+) {
+    val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             JobbyTopBar()
         }
     ) { innerPadding ->
-        JobApplicationList(
-            jobApplications = JobApplication.sampleJobApplication, //placeholder data
-            modifier = Modifier.padding(innerPadding)
-        )
+        when(uiState){
+            is JobApplicationUiState.Loading -> {}
+            is JobApplicationUiState.Success ->{
+                JobApplicationList(
+                    jobApplications = (uiState as JobApplicationUiState.Success).jobApplications,
+                    onEditClick = onEditClick,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+            is JobApplicationUiState.Error -> {
+                Text(text = "Error loading job applications")
+            }
+        }
     }
 }
 
@@ -113,6 +131,7 @@ fun JobbyTopBar() {
 @Composable
 fun JobApplicationList(
     jobApplications: List<JobApplication>,
+    onEditClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ){
     LazyColumn(
@@ -121,16 +140,17 @@ fun JobApplicationList(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(jobApplications.size) { index ->
+        items(jobApplications.size) { i ->
             JobApplicationCard(
-                jobApplication = jobApplications[index]
+                jobApplication = jobApplications[i],
+                onEditClick = { onEditClick(jobApplications[i].jobApplicationId) }
             )
         }
     }
 }
 
 @Composable
-fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modifier) {
+fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modifier, onEditClick: () -> Unit = {}) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
@@ -194,7 +214,7 @@ fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modi
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(
-                    onClick = { },
+                    onClick = { onEditClick() },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -218,7 +238,7 @@ private fun JobApplicationCardPreview() {
 //@Preview
 @Composable
 private fun JobApplicationListPreview() {
-    JobApplicationList(jobApplications = JobApplication.sampleJobApplication)
+    JobApplicationList(jobApplications = JobApplication.sampleJobApplication, onEditClick = {})
 }
 
 //@Preview
@@ -230,7 +250,9 @@ private fun JobbyTopBarPreview() {
 @Preview(showBackground = true, heightDp = 400)
 @Composable
 fun JobApplicationListScreenPreview() {
+    val dummyViewModel = remember { JobApplicationViewModel(DummyJobRepository(), DummyUserRepository()) }
     MaterialTheme {
-        JobApplicationListScreen()
+        JobApplicationListScreen(viewModel = dummyViewModel)
     }
+
 }

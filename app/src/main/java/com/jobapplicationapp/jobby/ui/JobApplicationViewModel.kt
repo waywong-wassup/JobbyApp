@@ -5,11 +5,14 @@ import com.jobapplicationapp.jobby.data.JobApplicationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
 import com.jobapplicationapp.jobby.data.JobApplication
+import com.jobapplicationapp.jobby.data.UserRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class JobApplicationViewModel (
-    private val jobApplicationRepository: JobApplicationRepository
+    private val jobApplicationRepository: JobApplicationRepository,
+    //include userRepository for now until user edit feature is implemented
+    private val userRepository: UserRepository
 ) : ViewModel() {
     val uiState: StateFlow<JobApplicationUiState> = jobApplicationRepository.getAllJobApplications()
         .map<List<JobApplication>, JobApplicationUiState> { JobApplicationUiState.Success(it) }
@@ -62,6 +65,17 @@ class JobApplicationViewModel (
 
     fun selectJob(job: JobApplication) {
         _changingJobApplication.value = job
+    }
+
+    fun loadJobApplication(id: Int) {
+        viewModelScope.launch {
+            jobApplicationRepository.getJobApplicationById(id)
+                .filterNotNull()
+                .first()
+                .let { job ->
+                    _changingJobApplication.value = job
+                }
+        }
     }
 
 
