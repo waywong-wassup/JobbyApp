@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
+import com.jobapplicationapp.jobby.data.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -295,20 +296,25 @@ fun FormSection(
     }
 }
 
-class DummyRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
+class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
     override fun getAllJobApplications() = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
     override fun getJobApplicationById(id: Int) = kotlinx.coroutines.flow.flowOf(null)
 }
+class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
+    override suspend fun updateUser(user: User) {}
+    override suspend fun deleteUser(user: User) {}
+    override suspend fun addUser(user: User) {}
+    override fun getCurrentUser(userId: Int) = kotlinx.coroutines.flow.flowOf(null)
+}
 
 @Preview (showBackground = true)
 @Composable
 fun JobApplicationDetailsScreenPreview() {
     val dummyViewModel = remember {
-        JobApplicationViewModel(DummyRepository()).apply {
-
+        JobApplicationViewModel(DummyJobRepository(),DummyUserRepository()).apply {
             selectJob(JobApplication.sampleJobApplication[1])
         }
     }

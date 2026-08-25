@@ -250,8 +250,9 @@ private fun JobbyTopBarPreview() {
 @Preview(showBackground = true, heightDp = 400)
 @Composable
 fun JobApplicationListScreenPreview() {
-    val dummyViewModel = remember { JobApplicationViewModel(DummyRepository()) }
+    val dummyViewModel = remember { JobApplicationViewModel(DummyJobRepository(), DummyUserRepository()) }
     MaterialTheme {
         JobApplicationListScreen(viewModel = dummyViewModel)
     }
+
 }

@@ -11,8 +11,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            val repository = jobbyApplication().container.jobApplicationRepository
-            JobApplicationViewModel(repository)
+            val jobApplicationRepository = jobbyApplication().container.jobApplicationRepository
+            val userRepository = jobbyApplication().container.userRepository
+
+            JobApplicationViewModel(jobApplicationRepository, userRepository)
         }
     }
 }
