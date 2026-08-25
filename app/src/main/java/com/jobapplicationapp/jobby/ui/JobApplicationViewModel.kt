@@ -64,5 +64,16 @@ class JobApplicationViewModel (
         _changingJobApplication.value = job
     }
 
+    fun loadJobApplication(id: Int) {
+        viewModelScope.launch {
+            jobApplicationRepository.getJobApplicationById(id)
+                .filterNotNull()
+                .first()
+                .let { job ->
+                    _changingJobApplication.value = job
+                }
+        }
+    }
+
 
  }
