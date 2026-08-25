@@ -20,4 +20,7 @@ interface JobApplicationDao {
 
     @Query("SELECT * from JobApplication ORDER BY jobApplicationId ASC")
     fun getAllJobApplications(): Flow<List<JobApplication>>
+
+    @Query("SELECT * from JobApplication WHERE jobApplicationId = :id")
+    fun getJobApplicationById(id: Int): Flow<JobApplication?>
 }
