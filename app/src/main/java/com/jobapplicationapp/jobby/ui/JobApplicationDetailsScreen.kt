@@ -130,9 +130,7 @@ fun JobApplicationDetailsBottomBar(
                 Text(text = stringResource(R.string.discard))
             }
             Button(
-                onClick = {
-                    jobApplicationViewModel.saveJobApplicationChange()
-                          },
+                onClick = onSaveClick,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -302,6 +300,7 @@ class DummyRepository : com.jobapplicationapp.jobby.data.JobApplicationRepositor
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
+    override fun getJobApplicationById(id: Int) = kotlinx.coroutines.flow.flowOf(null)
 }
 
 @Preview (showBackground = true)
