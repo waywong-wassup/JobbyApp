@@ -4,6 +4,7 @@ import android.content.Context
 
 interface AppContainer {
     val jobApplicationRepository: JobApplicationRepository
+    val userRepository: UserRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -13,4 +14,9 @@ class AppDataContainer(private val context: Context) : AppContainer {
         // 3. Put them inside the OfflineRepository
         OfflineJobApplicationRepository(AppDatabase.getDatabase(context).jobApplicationDao())
     }
+
+    override val userRepository: UserRepository by lazy {
+        OfflineUserRepository(AppDatabase.getDatabase(context).userDao())
+    }
+
 }
