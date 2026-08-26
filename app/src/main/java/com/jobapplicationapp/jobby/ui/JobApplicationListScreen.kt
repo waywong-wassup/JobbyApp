@@ -16,11 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,13 +54,30 @@ import com.jobapplicationapp.jobby.data.User
 
 @Composable
 fun JobApplicationListScreen(
-    viewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory), modifier: Modifier = Modifier, onEditClick: (Int) -> Unit = {}
+    viewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    modifier: Modifier = Modifier,
+    onEditClick: (Int) -> Unit = {},
+    onAddClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             JobbyTopBar()
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
+            {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Job Application"
+                )
+            }
+
         }
     ) { innerPadding ->
         when(uiState){

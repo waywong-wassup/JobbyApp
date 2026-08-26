@@ -23,7 +23,10 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,11 +50,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
+import com.jobapplicationapp.jobby.data.Progress
 import com.jobapplicationapp.jobby.data.User
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
 
 
@@ -63,22 +71,50 @@ fun JobApplicationDetailsScreen(
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
+
+    val jobTitleFocusRequester = remember { FocusRequester() }
+    val companyNameFocusRequester = remember { FocusRequester() }
+    var jobTitleError by remember { mutableStateOf(false) }
+    var companyNameError by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             JobApplicationDetailsTopBar(onBackClick = onBackClick)
         },
         bottomBar = {
             JobApplicationDetailsBottomBar(
-                jobApplicationViewModel = jobApplicationViewModel,
                 onDiscardClick = onDiscardClick,
-                onSaveClick = onSaveClick
+                onSaveClick = {
+                    val error = jobApplicationViewModel.validateInput()
+                    when (error) {
+                        JobApplicationViewModel.ValidationError.JOB_TITLE_REQUIRED -> {
+                            jobTitleError = true
+                            jobTitleFocusRequester.requestFocus()
+                        }
+                        JobApplicationViewModel.ValidationError.COMPANY_NAME_REQUIRED -> {
+                            companyNameError = true
+                            companyNameFocusRequester.requestFocus()
+                        }
+                        JobApplicationViewModel.ValidationError.NONE -> {
+                            jobApplicationViewModel.saveJobApplicationChange()
+                            onSaveClick()
+                        }
+                    }
+                }
             )
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         JobApplicationDetailsForm(
+            jobTitleFocusRequester = jobTitleFocusRequester,
+            companyNameFocusRequester = companyNameFocusRequester,
+            jobTitleError = jobTitleError,
+            companyNameError = companyNameError,
+            onJobTitleChange = { jobTitleError = it.isEmpty() },
+            onCompanyNameChange = { companyNameError = it.isEmpty() },
             jobApplicationViewModel = jobApplicationViewModel,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
         )
     }
@@ -111,7 +147,6 @@ fun JobApplicationDetailsTopBar(onBackClick: () -> Unit = {}) {
 
 @Composable
 fun JobApplicationDetailsBottomBar(
-    jobApplicationViewModel: JobApplicationViewModel,
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
@@ -144,14 +179,23 @@ fun JobApplicationDetailsBottomBar(
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsForm(
+    jobTitleFocusRequester: FocusRequester,
+    companyNameFocusRequester: FocusRequester,
+    jobTitleError: Boolean,
+    companyNameError: Boolean,
+    onJobTitleChange: (String) -> Unit,
+    onCompanyNameChange: (String) -> Unit,
     jobApplicationViewModel: JobApplicationViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
     val job by jobApplicationViewModel.changingJobApplication.collectAsState()
     val currentJob = job ?: return
+    val requiredFieldMessage = "Required"
+
 
     Column(
         modifier = modifier
@@ -162,25 +206,45 @@ fun JobApplicationDetailsForm(
         FormSection(title = "Job Information") {
             OutlinedTextField(
                 value = currentJob.jobTitle,
-                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobTitle = it) } },
+                isError = jobTitleError,
+                supportingText = {
+                    if (jobTitleError) {
+                        Text(requiredFieldMessage)
+                    }
+                },
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobTitle = it) }
+                    onJobTitleChange(it)
+                },
                 label = { Text(stringResource(R.string.job_title)) },
+                modifier = Modifier.fillMaxWidth()
+                                    .focusRequester(jobTitleFocusRequester)
+            )
+
+            OutlinedTextField(
+                value = currentJob.companyName,
+                isError = companyNameError,
+                supportingText = {
+                    if (companyNameError) {
+                        Text(requiredFieldMessage)
+                    }
+                },
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(companyName = it) }
+                    onCompanyNameChange(it)
+                                },
+                label = { Text(stringResource(R.string.company_name)) },
+                modifier = Modifier.fillMaxWidth()
+                    .focusRequester(companyNameFocusRequester)
+            )
+            OutlinedTextField(
+                value = currentJob.location ?: "",
+                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(location = it) } },
+                label = { Text(stringResource(R.string.location)) },
+                leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = currentJob.companyName,
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(companyName = it) } },
-                    label = { Text(stringResource(R.string.company_name)) },
-                    modifier = Modifier.weight(1f)
-                )
-                OutlinedTextField(
-                    value = currentJob.location ?: "",
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(location = it) } },
-                    label = { Text(stringResource(R.string.location)) },
-                    modifier = Modifier.weight(1f),
-                    leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) }
-                )
-            }
+
             OutlinedTextField(
                 value = currentJob.applicationURL ?: "",
                 onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(applicationURL = it) } },
@@ -200,27 +264,57 @@ fun JobApplicationDetailsForm(
 
         FormSection(title = "Application Progress") {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = currentJob.progress,
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(progress = it) } },
-                    label = { Text(stringResource(R.string.progress)) },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = null
-                        )
-                    },
+                var expanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
                     modifier = Modifier.weight(1f)
-                )
+                ){
+                    OutlinedTextField(
+                        value = currentJob.progress,
+                        onValueChange = {  },
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.progress)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        //link menu to text field
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        Progress.entries.forEach { progress ->
+                            DropdownMenuItem(
+                                text = { Text(progress.progressPhase) },
+                                onClick = {
+                                    jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(progress = progress.progressPhase) }
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
                 OutlinedTextField(
-                    value = currentJob.salary?.toString() ?: "",
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = it.toLongOrNull()) } },
+                    // format to 10000 to 10,000 etc
+                    value = currentJob.salary?.let { "%,d".format(it) } ?: "",
+                    onValueChange = { input ->
+                        val unformattedSalary = input.replace(",","")
+                        if(unformattedSalary.isEmpty()){
+                            jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = null) }
+                        } else {
+                            jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = unformattedSalary.toLong()) }
+                        }
+                    },
                     label = { Text(stringResource(R.string.salary)) },
                     modifier = Modifier.weight(1f),
-                    prefix = { Text("$") }
+                    prefix = { Text("$") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
+
                 OutlinedTextField(
                     value = currentJob.applicationPostedDate ?: "",
                     leadingIcon = {
@@ -230,34 +324,34 @@ fun JobApplicationDetailsForm(
                         )
                     },
                     onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(applicationPostedDate = it) } },
-                    label = { Text(stringResource(R.string.posted_date)) },
-                    modifier = Modifier.weight(1f)
+                    label = { Text(stringResource(R.string.posted_date), fontSize = 16.sp) },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = currentJob.jobType ?: "",
                     onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobType = it) } },
                     label = { Text(stringResource(R.string.job_type)) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
+
         }
 
         FormSection(title = "Contact Information") {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+
                 OutlinedTextField(
                     value = currentJob.contactName ?: "",
                     onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(contactName = it) } },
                     label = { Text(stringResource(R.string.contact_name)) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
                 )
                 OutlinedTextField(
                     value = currentJob.contactDetails ?: "",
                     onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(contactDetails = it) } },
                     label = { Text(stringResource(R.string.contact_details)) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
+
         }
 
         FormSection(title = "Additional Notes") {
