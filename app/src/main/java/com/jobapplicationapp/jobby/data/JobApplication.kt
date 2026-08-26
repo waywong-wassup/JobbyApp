@@ -31,3 +31,12 @@ data class JobApplication(
     }
 }
 
+enum class Progress (val progressPhase: String) {
+    TOAPPLY("To Apply"),
+    APPLIED("Applied"),
+    SCREENCALL("Screen Call"),
+    INTERVIEW("Interview"),
+    HIRED("Hired"),
+    REJECTED("Rejected"),
+    ACCEPTED("Accepted")
+}

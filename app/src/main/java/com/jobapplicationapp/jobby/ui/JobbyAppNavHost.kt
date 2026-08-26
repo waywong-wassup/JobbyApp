@@ -5,12 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.jobapplicationapp.jobby.data.JobApplication
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -31,7 +29,11 @@ fun JobbyAppNavHost(
     ) {
         composable<JobApplicationListScreenRoute> {
             JobApplicationListScreen(
-                onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) })
+                onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
+                onAddClick = {
+                    navController.navigate(JobApplicationDetailsScreenRoute(0))
+                }
+            )
         }
         composable<JobApplicationDetailsScreenRoute> { backStack ->
             val details: JobApplicationDetailsScreenRoute = backStack.toRoute()
@@ -46,12 +48,12 @@ fun JobbyAppNavHost(
             }
 
             JobApplicationDetailsScreen(
-                 jobApplicationViewModel = viewModel,
+                jobApplicationViewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
                 onDiscardClick = { navController.popBackStack() },
                 onSaveClick = {
-                    viewModel.saveJobApplicationChange()
-                    navController.popBackStack() }
+                    navController.popBackStack()
+                }
 
             )
         }
