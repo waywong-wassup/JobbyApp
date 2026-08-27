@@ -44,9 +44,8 @@ class AppDatabaseTest {
 
     //Test data
     private var user1 = User(1,"Harry", "Potter")
-    private var user2 = User(2,"Ron", "Weasley")
-    private var jobApplication1 = JobApplication(1,"Janitor", "Mom's basement", 5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired")
-    private var jobApplication2 = JobApplication(2,"Librarian","Library", 5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
+    private var jobApplication1 = JobApplication(1,"Janitor", "Mom's basement", "Auckland",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired")
+    private var jobApplication2 = JobApplication(2,"Librarian","Library", "",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
 
     @Test
     fun testInsertAndRetrieveOneJobApplication() = runBlocking {
@@ -79,33 +78,34 @@ class AppDatabaseTest {
     }
 
     @Test
+    fun testInsertAndUpdateJobApplication() = runBlocking {
+        jobApplicationDao.addJobApplication(jobApplication1)
+        val addedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        assertEquals(addedJobApplication[0], jobApplication1)
+        val updateDetails = jobApplication1.copy(jobTitle = "Mail Man", companyName = "Hedwig",location = "under staircases")
+        jobApplicationDao.updateJobApplication(updateDetails)
+        val updatedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        assertEquals(updatedJobApplication[0], updateDetails)
+
+    }
+
+    @Test
     fun testInsertAndRetrieveOneUser() = runBlocking {
         userDao.insertUser(user1)
-        val addedUser = userDao.getAllUsers().first()
-        assertEquals(addedUser[0], user1)
+        val addedUser = userDao.getCurrentUsers(user1.userId)
+        assertEquals(addedUser.first(), user1)
     }
 
     @Test
-    fun testInsertAndRetrieveMultipleUsers() = runBlocking {
+    fun testInsertAndUpdateUserName() = runBlocking {
         userDao.insertUser(user1)
-        userDao.insertUser(user2)
-        val addedUser = userDao.getAllUsers().first()
-        assertEquals(addedUser[0], user1)
-        assertEquals(addedUser[1], user2)
-    }
-
-    @Test
-    fun testInsertAndRetrieveMultipleUsersAndDeleteOne() = runBlocking {
-        userDao.insertUser(user1)
-        userDao.insertUser(user2)
-        val addedUser = userDao.getAllUsers().first()
-        assertEquals(addedUser[0], user1)
-        assertEquals(addedUser[1], user2)
-
-        userDao.deleteUser(user1)
-        val deletedUser = userDao.getAllUsers().first()
-        //verify only one user left in the database
-        assertEquals(deletedUser[0], user2)
+        val addedUser = userDao.getCurrentUsers(user1.userId)
+        assertEquals(addedUser.first(), user1)
+        val updateName = user1.copy(firstName = "Sirius", lastName = "Black")
+        userDao.updateUser(updateName)
+        val updatedUser = userDao.getCurrentUsers(user1.userId)
+        assertEquals(updatedUser.first()!!.firstName, "Sirius")
+        assertEquals(updatedUser.first()!!.lastName, "Black")
     }
 
 }
