@@ -1,5 +1,7 @@
 package com.jobapplicationapp.jobby.data
 
+import kotlinx.coroutines.flow.Flow
+
 /*
 this is where it actually does the job it says in JobApplicationRepository
  */
@@ -18,6 +20,9 @@ class OfflineJobApplicationRepository(private val dao: JobApplicationDao) : JobA
         dao.deleteJobApplication(jobApplication)
     }
 
-    override fun getJobApplicationById(id: Int) = dao.getJobApplicationById(id)
+    override fun getJobApplicationById(id: Int): Flow<JobApplication?> {
+        return dao.getJobApplicationById(id)
+    }
+
 
 }
