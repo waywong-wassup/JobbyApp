@@ -56,15 +56,20 @@ class JobApplicationViewModel (
 
     fun saveJobApplicationChange() {
         val changes = _changingJobApplication.value
-        if (changes != null) {
+        if (changes != null && validateInput() == ValidationError.NONE) {
             viewModelScope.launch {
-                if (changes.jobApplicationId == 0) {
-                    jobApplicationRepository.addJobApplication(changes)
-                } else {
-                    jobApplicationRepository.updateJobApplication(changes)
+                try {
+                    if (changes.jobApplicationId == 0) {
+                        addJobApplication(changes)
+                    } else {
+                        updateJobApplication(changes)
+                    }
+                } catch (e: Exception) {
+                    println("Error saving job application: ${e.message}")
                 }
             }
         }
+
     }
     fun selectJob(job: JobApplication) {
         _changingJobApplication.value = job
@@ -90,12 +95,21 @@ class JobApplicationViewModel (
         else
         {
             viewModelScope.launch {
-                jobApplicationRepository.getJobApplicationById(id)
-                    .filterNotNull()
-                    .first()
-                    .let { job ->
-                        _changingJobApplication.value = job
-                    }
+//                jobApplicationRepository.getJobApplicationById(id)
+//                    .filterNotNull()
+//                    .first()
+//                    .let { job ->
+//                        _changingJobApplication.value = job
+//                    }
+                val job = jobApplicationRepository.getJobApplicationById(id)
+                    .firstOrNull()
+                if (job != null) {
+                    _changingJobApplication.value = job
+                } else {
+                    // Handle the case where the job application with the given ID is not found
+                    println("Error: Job application with ID $id not found")
+                    _changingJobApplication.value = null
+                }
             }
         }
     }
