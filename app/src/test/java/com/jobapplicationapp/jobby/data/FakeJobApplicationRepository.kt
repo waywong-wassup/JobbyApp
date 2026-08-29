@@ -3,14 +3,21 @@ package com.jobapplicationapp.jobby.data
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 
 class FakeJobApplicationRepository : JobApplicationRepository {
 
     private val jobApplicationsFlow = MutableStateFlow<List<JobApplication>>(emptyList())
     var shouldThrowError = false
-    override fun getAllJobApplications(): Flow<List<JobApplication>> {
-        return jobApplicationsFlow
+    override fun getAllJobApplications(): Flow<List<JobApplication>> = flow {
+        if (shouldThrowError) {
+            throw Exception("Fake error")
+        }
+        //ensure error is being thrown into the flow.
+        jobApplicationsFlow.collect {
+            emit(it)
+        }
     }
 
     override suspend fun addJobApplication(jobApplication: JobApplication) {
