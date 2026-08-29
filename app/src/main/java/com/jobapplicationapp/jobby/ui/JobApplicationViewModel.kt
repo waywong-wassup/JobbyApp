@@ -95,12 +95,21 @@ class JobApplicationViewModel (
         else
         {
             viewModelScope.launch {
-                jobApplicationRepository.getJobApplicationById(id)
-                    .filterNotNull()
-                    .first()
-                    .let { job ->
-                        _changingJobApplication.value = job
-                    }
+//                jobApplicationRepository.getJobApplicationById(id)
+//                    .filterNotNull()
+//                    .first()
+//                    .let { job ->
+//                        _changingJobApplication.value = job
+//                    }
+                val job = jobApplicationRepository.getJobApplicationById(id)
+                    .firstOrNull()
+                if (job != null) {
+                    _changingJobApplication.value = job
+                } else {
+                    // Handle the case where the job application with the given ID is not found
+                    println("Error: Job application with ID $id not found")
+                    _changingJobApplication.value = null
+                }
             }
         }
     }
