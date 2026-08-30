@@ -54,6 +54,13 @@ class JobApplicationViewModel (
         }
     }
 
+    fun deleteCurrentJobApplication(){
+        val job = _changingJobApplication.value
+        if (job != null) {
+            deleteJobApplication(job)
+        }
+    }
+
     fun saveJobApplicationChange() {
         val changes = _changingJobApplication.value
         if (changes != null && validateInput() == ValidationError.NONE) {

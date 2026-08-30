@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -69,7 +70,8 @@ fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
-    onSaveClick: () -> Unit = {}
+    onSaveClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {}
 ) {
 
     val jobTitleFocusRequester = remember { FocusRequester() }
@@ -79,7 +81,12 @@ fun JobApplicationDetailsScreen(
 
     Scaffold(
         topBar = {
-            JobApplicationDetailsTopBar(onBackClick = onBackClick)
+            JobApplicationDetailsTopBar(
+                onBackClick = onBackClick,
+                onDeleteClick = {
+                    jobApplicationViewModel.deleteCurrentJobApplication()
+                    onDeleteClick()
+                })
         },
         bottomBar = {
             JobApplicationDetailsBottomBar(
@@ -122,7 +129,10 @@ fun JobApplicationDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JobApplicationDetailsTopBar(onBackClick: () -> Unit = {}) {
+fun JobApplicationDetailsTopBar(
+    onBackClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {}
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -141,7 +151,17 @@ fun JobApplicationDetailsTopBar(onBackClick: () -> Unit = {}) {
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = Color(0xFFDCD0FF)
-        )
+        ),
+        actions = {
+            IconButton(onClick = {onDeleteClick()}
+            )
+            {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete"
+                )
+            }
+        }
     )
 }
 
