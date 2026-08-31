@@ -53,6 +53,12 @@ fun JobbyAppNavHost(
                 onDiscardClick = { navController.popBackStack() },
                 onSaveClick = {
                     navController.popBackStack()
+                },
+                onDeleteClick = {
+                    navController.popBackStack()
+                },
+                onConfirmDelete = {
+                    navController.popBackStack()
                 }
 
             )
