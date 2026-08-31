@@ -54,10 +54,15 @@ class JobApplicationViewModel (
         }
     }
 
-    fun deleteCurrentJobApplication(){
+    fun deleteCurrentJobApplication() {
         val job = _changingJobApplication.value
-        if (job != null) {
-            deleteJobApplication(job)
+        try {
+            if (job != null) {
+                deleteJobApplication(job)
+            }
+        }
+        catch (e: Exception) {
+            println("Error deleting job application: ${e.message}")
         }
     }
 
@@ -102,12 +107,6 @@ class JobApplicationViewModel (
         else
         {
             viewModelScope.launch {
-//                jobApplicationRepository.getJobApplicationById(id)
-//                    .filterNotNull()
-//                    .first()
-//                    .let { job ->
-//                        _changingJobApplication.value = job
-//                    }
                 val job = jobApplicationRepository.getJobApplicationById(id)
                     .firstOrNull()
                 if (job != null) {
