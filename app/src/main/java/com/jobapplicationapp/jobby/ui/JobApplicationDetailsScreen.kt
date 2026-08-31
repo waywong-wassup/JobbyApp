@@ -9,25 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -53,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -60,6 +55,7 @@ import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.Progress
 import com.jobapplicationapp.jobby.data.User
+import com.jobapplicationapp.jobby.ui.components.DeleteConfirmationDialog
 import kotlinx.coroutines.flow.asStateFlow
 
 
@@ -69,17 +65,36 @@ fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
-    onSaveClick: () -> Unit = {}
+    onSaveClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    onConfirmDelete: () -> Unit = {},
+    onDismissDelete: () -> Unit = {}
 ) {
 
     val jobTitleFocusRequester = remember { FocusRequester() }
     val companyNameFocusRequester = remember { FocusRequester() }
     var jobTitleError by remember { mutableStateOf(false) }
     var companyNameError by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember {mutableStateOf(false)}
+
+    //delete dialog to overlay on top of details screen
+    if (showDeleteDialog) {
+        DeleteConfirmationDialog (
+            onConfirmDelete = {
+                showDeleteDialog = false
+                jobApplicationViewModel.deleteCurrentJobApplication()
+                onConfirmDelete()
+            },
+            onDismissDelete = { showDeleteDialog = false}
+        )
+    }
 
     Scaffold(
         topBar = {
-            JobApplicationDetailsTopBar(onBackClick = onBackClick)
+            JobApplicationDetailsTopBar(
+                onBackClick = onBackClick,
+                onDeleteIconClick = { showDeleteDialog = true
+                })
         },
         bottomBar = {
             JobApplicationDetailsBottomBar(
@@ -122,7 +137,10 @@ fun JobApplicationDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JobApplicationDetailsTopBar(onBackClick: () -> Unit = {}) {
+fun JobApplicationDetailsTopBar(
+    onBackClick: () -> Unit = {},
+    onDeleteIconClick: () -> Unit = {}
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -141,7 +159,17 @@ fun JobApplicationDetailsTopBar(onBackClick: () -> Unit = {}) {
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = Color(0xFFDCD0FF)
-        )
+        ),
+        actions = {
+            IconButton(onClick = {onDeleteIconClick()}
+            )
+            {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete"
+                )
+            }
+        }
     )
 }
 
@@ -389,6 +417,9 @@ fun FormSection(
         //HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
+
+
+
 
 class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
     override fun getAllJobApplications() = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
