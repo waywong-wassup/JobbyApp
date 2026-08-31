@@ -56,6 +56,9 @@ fun JobbyAppNavHost(
                 },
                 onDeleteClick = {
                     navController.popBackStack()
+                },
+                onConfirmDelete = {
+                    navController.popBackStack()
                 }
 
             )

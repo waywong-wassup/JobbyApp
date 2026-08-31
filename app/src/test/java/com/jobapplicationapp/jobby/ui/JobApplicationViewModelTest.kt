@@ -54,6 +54,27 @@ class JobApplicationViewModelTest {
         }
     }
 
+    @Test
+    fun deleteCurrentJobApplication_validJobIdDeletesSuccess() = runTest {
+        fakeJobRepository.addJobApplication(testDataJob1)
+        viewModel.loadJobApplication(1)
+        viewModel.deleteCurrentJobApplication()
+        viewModel.loadJobApplication(1)
+        assertNull(viewModel.changingJobApplication.value)
+    }
+
+    @Test
+    fun deleteCurrentJobApplication_invalidJobIdDoesNotDelete() = runTest{
+        fakeJobRepository.addJobApplication(testDataJob1)
+        viewModel.loadJobApplication(99)
+        val loadedInvalidJob = viewModel.changingJobApplication.value
+        assertNull(loadedInvalidJob) //no job should be loaded
+        viewModel.deleteCurrentJobApplication()
+        viewModel.loadJobApplication(1)
+        val result = viewModel.changingJobApplication.value
+        assertEquals(testDataJob1, result) //id 1 not deleted
+
+    }
 
     @Test
     fun saveJobApplicationChange_newJobWithChanges_addsToRepository() = runTest {
