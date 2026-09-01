@@ -12,15 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.jobapplicationapp.jobby.ui.JobApplicationListScreen
 import com.jobapplicationapp.jobby.ui.JobbyAppNavHost
+import com.jobapplicationapp.jobby.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Scaffold(modifier = Modifier.fillMaxSize()) {
+            AppTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) {
 
-                JobbyAppNavHost()
+                    JobbyAppNavHost()
+                }
             }
 
         }
