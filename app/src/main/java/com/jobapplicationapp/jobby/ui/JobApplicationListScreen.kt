@@ -1,5 +1,6 @@
 package com.jobapplicationapp.jobby.ui
 
+import android.content.res.Resources
 import androidx.compose.foundation.Image
 
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +52,7 @@ import androidx.navigation.compose.rememberNavController
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.User
+import com.jobapplicationapp.jobby.ui.theme.AppTheme
 
 
 @Composable
@@ -115,7 +118,7 @@ fun JobbyAppUserName(user: User, modifier: Modifier = Modifier) {
         text = "${user.firstName} ${user.lastName}",
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
+        color = MaterialTheme.colorScheme.onPrimary,
         modifier = modifier
     )
 }
@@ -133,15 +136,16 @@ fun JobbyTopBar() {
                 Column {
                     Text(
                         text = "Jobby",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     JobbyAppUserName(user = User.sampleUser)
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFFDCD0FF)
+            containerColor = MaterialTheme.colorScheme.secondary,
         )
     )
 }
@@ -172,7 +176,13 @@ fun JobApplicationList(
 fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modifier, onEditClick: () -> Unit = {}) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+//        colors = CardDefaults.cardColors(
+//            containerColor = MaterialTheme.colorScheme.primaryContainer
+//            ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
     ) {
         Row(
             modifier = Modifier
@@ -187,30 +197,33 @@ fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modi
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = jobApplication.companyName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                // check if location is not null, when null, don't render this at all
-                if (jobApplication.location!!.isNotEmpty())
-                {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = jobApplication.location!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = jobApplication.companyName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    // check if location is not null, when null, don't render this at all
+                    if (jobApplication.location!!.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.outline
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = jobApplication.location!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
                     }
                 }
             }
@@ -221,14 +234,14 @@ fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modi
 
             ) {
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
                     shape = RoundedCornerShape(32.dp)
                 ) {
                     Text(
                         text = jobApplication.progress,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -247,11 +260,12 @@ fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modi
     }
 }
 
-//@Preview
+@Preview
 @Composable
 private fun JobApplicationCardPreview() {
+    AppTheme{
     JobApplicationCard(jobApplication = JobApplication.sampleJobApplication[0]
-    )
+    )}
 }
 
 //@Preview
@@ -270,7 +284,7 @@ private fun JobbyTopBarPreview() {
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyViewModel = remember { JobApplicationViewModel(DummyJobRepository(), DummyUserRepository()) }
-    MaterialTheme {
+    AppTheme {
         JobApplicationListScreen(viewModel = dummyViewModel)
     }
 
