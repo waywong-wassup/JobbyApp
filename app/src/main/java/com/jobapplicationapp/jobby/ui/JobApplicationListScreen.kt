@@ -1,9 +1,9 @@
 package com.jobapplicationapp.jobby.ui
 
-import android.content.res.Resources
 import androidx.compose.foundation.Image
-
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.TopAppBar
@@ -26,7 +26,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -44,15 +43,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.compose.rememberNavController
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.User
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
+import com.jobapplicationapp.jobby.ui.theme.onWarningContainerDark
+import com.jobapplicationapp.jobby.ui.theme.onWarningContainerLight
+import com.jobapplicationapp.jobby.ui.theme.warningContainerDark
+import com.jobapplicationapp.jobby.ui.theme.warningContainerLight
 
 
 @Composable
@@ -145,7 +148,7 @@ fun JobbyTopBar() {
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.primary,
         )
     )
 }
@@ -173,50 +176,94 @@ fun JobApplicationList(
 }
 
 @Composable
-fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modifier, onEditClick: () -> Unit = {}) {
+fun JobApplicationCard(
+    jobApplication: JobApplication,
+    modifier: Modifier = Modifier,
+    onEditClick: () -> Unit = {}
+) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-//        colors = CardDefaults.cardColors(
-//            containerColor = MaterialTheme.colorScheme.primaryContainer
-//            ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+            defaultElevation = 2.dp
+        ),
+        onClick = onEditClick
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            val (containerColor, contentColor) = getProgressColor(jobApplication.progress)
+            Surface(
+                color = containerColor,
+                shape = RoundedCornerShape(
+                    bottomStart = 24.dp,
+                    topEnd = 12.dp
+                ),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .width(100.dp)
+                    .height(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center){
+                    Text(
+                        text = jobApplication.progress,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = contentColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                //Job Title
                 Text(
                     text = jobApplication.jobTitle,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(end = 88.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
+                    //Company name
                     Text(
                         text = jobApplication.companyName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    // check if location is not null, when null, don't render this at all
+
+                    //Location field,  check if location is not null, when null, don't render this at all
                     if (jobApplication.location!!.isNotEmpty()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.outline
-                            )
+                            //display Home icon if it is a remote job, ignore cases
+                            if (jobApplication.location?.trim()
+                                    .equals("Remote", ignoreCase = true)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Home,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.secondary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.secondary
+                                )
+                            }
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = jobApplication.location!!,
@@ -227,42 +274,41 @@ fun JobApplicationCard(jobApplication: JobApplication, modifier: Modifier = Modi
                     }
                 }
             }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-
-            ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                    shape = RoundedCornerShape(32.dp)
-                ) {
-                    Text(
-                        text = jobApplication.progress,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = { onEditClick() },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Job Application",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
         }
     }
 }
 
+@Composable
+fun getProgressColor(progress: String): Pair<Color, Color> {
+    val isDark = isSystemInDarkTheme()
+    return when (progress) {
+        "Accepted" -> {
+            Color(0xFF93C572) to MaterialTheme.colorScheme.onTertiaryContainer
+        }
+        "Offered" -> {
+            MaterialTheme.colorScheme.tertiary to MaterialTheme.colorScheme.onTertiary
+        }
+        "Interview", "Screen Call" -> {
+            if (isDark) warningContainerDark to onWarningContainerDark
+            else warningContainerLight to onWarningContainerLight
+        }
+        "Rejected" -> {
+            Color(0xFFFF746C) to MaterialTheme.colorScheme.onErrorContainer
+        }
+        "To Apply" -> {
+            MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
+        }
+        else -> {
+
+            MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+        }
+    }
+}
+
+
 @Preview
 @Composable
-private fun JobApplicationCardPreview() {
+fun JobApplicationCardPreview() {
     AppTheme{
     JobApplicationCard(jobApplication = JobApplication.sampleJobApplication[0]
     )}
