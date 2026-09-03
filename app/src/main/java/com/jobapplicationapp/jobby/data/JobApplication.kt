@@ -36,7 +36,7 @@ enum class Progress (val progressPhase: String) {
     APPLIED("Applied"),
     SCREENCALL("Screen Call"),
     INTERVIEW("Interview"),
-    OFFER("Offered"),
+    OFFERED("Offered"),
     REJECTED("Rejected"),
     ACCEPTED("Accepted")
 }
