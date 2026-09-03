@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,6 +56,7 @@ import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.Progress
 import com.jobapplicationapp.jobby.data.User
 import com.jobapplicationapp.jobby.ui.components.DeleteConfirmationDialog
+import com.jobapplicationapp.jobby.ui.theme.AppTheme
 import kotlinx.coroutines.flow.asStateFlow
 
 
@@ -146,19 +147,21 @@ fun JobApplicationDetailsTopBar(
             Text(
                 text = stringResource(R.string.job_application_details),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back_to_list)
+                    contentDescription = stringResource(R.string.back_to_list),
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color(0xFFDCD0FF)
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         actions = {
             IconButton(onClick = {onDeleteIconClick()}
@@ -166,7 +169,8 @@ fun JobApplicationDetailsTopBar(
             {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete"
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -281,7 +285,7 @@ fun JobApplicationDetailsForm(
                 trailingIcon = {
                     IconButton(onClick = {  }) {
                         Icon(
-                            imageVector = Icons.Default.Info, //TODO - import openInNew vector
+                            imageVector = Icons.Default.OpenInNew,
                             contentDescription = "Open link"
                         )
                     }
@@ -443,7 +447,7 @@ fun JobApplicationDetailsScreenPreview() {
             selectJob(JobApplication.sampleJobApplication[1])
         }
     }
-    MaterialTheme {
+    AppTheme{
         JobApplicationDetailsScreen(jobApplicationViewModel = dummyViewModel)
     }
 }
