@@ -4,9 +4,6 @@ import kotlinx.coroutines.flow.Flow
 
 class OfflineUserRepository(private val dao: UserDao) : UserRepository
 {
-    override suspend fun updateUser(user: User) {
-        dao.updateUser(user)
-    }
     override suspend fun deleteUser(user: User) {
         dao.deleteUser(user)
     }
