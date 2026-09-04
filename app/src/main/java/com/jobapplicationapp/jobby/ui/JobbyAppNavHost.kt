@@ -38,17 +38,21 @@ fun JobbyAppNavHost(
         composable<JobApplicationDetailsScreenRoute> { backStack ->
             val details: JobApplicationDetailsScreenRoute = backStack.toRoute()
 
-            val viewModel: JobApplicationViewModel = viewModel(
+            val jobApplicationViewModel: JobApplicationViewModel = viewModel(
+                factory = AppViewModelProvider.Factory
+            )
+            val userViewModel: UserViewModel = viewModel(
                 factory = AppViewModelProvider.Factory
             )
 
             //LaunchedEffect, for running this code just once when this screen first appear
             LaunchedEffect(details.id) {
-                viewModel.loadJobApplication(details.id)
+                jobApplicationViewModel.loadJobApplication(details.id)
             }
 
             JobApplicationDetailsScreen(
-                jobApplicationViewModel = viewModel,
+                jobApplicationViewModel = jobApplicationViewModel,
+                userViewModel = userViewModel,
                 onBackClick = { navController.popBackStack() },
                 onDiscardClick = { navController.popBackStack() },
                 onSaveClick = {

@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.asStateFlow
 @Composable
 fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
+    userViewModel: UserViewModel,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
@@ -433,7 +434,6 @@ class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationReposi
     override fun getJobApplicationById(id: Int) = kotlinx.coroutines.flow.flowOf(null)
 }
 class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
-    override suspend fun updateUser(user: User) {}
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
     override fun getCurrentUser(userId: Int) = kotlinx.coroutines.flow.flowOf(null)
@@ -442,13 +442,17 @@ class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
 @Preview (showBackground = true)
 @Composable
 fun JobApplicationDetailsScreenPreview() {
-    val dummyViewModel = remember {
-        JobApplicationViewModel(DummyJobRepository(),DummyUserRepository()).apply {
+    val dummyJobApplicationViewModel = remember {
+        JobApplicationViewModel(DummyJobRepository()).apply {
             selectJob(JobApplication.sampleJobApplication[1])
         }
     }
+    val dummyUserViewModel = remember {
+        UserViewModel(DummyUserRepository(), 1)
+    }
+
     AppTheme{
-        JobApplicationDetailsScreen(jobApplicationViewModel = dummyViewModel)
+        JobApplicationDetailsScreen(jobApplicationViewModel = dummyJobApplicationViewModel, userViewModel = dummyUserViewModel)
     }
 }
 

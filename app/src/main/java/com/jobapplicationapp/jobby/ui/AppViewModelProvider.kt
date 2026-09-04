@@ -11,10 +11,13 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            val jobApplicationRepository = jobbyApplication().container.jobApplicationRepository
-            val userRepository = jobbyApplication().container.userRepository
-
-            JobApplicationViewModel(jobApplicationRepository, userRepository)
+            JobApplicationViewModel(jobbyApplication().container.jobApplicationRepository)
+    }
+        initializer {
+            UserViewModel(
+                jobbyApplication().container.userRepository,
+                1 //temp sample user for now TODO: replace this when Firebase is ready
+            )
         }
     }
 }
