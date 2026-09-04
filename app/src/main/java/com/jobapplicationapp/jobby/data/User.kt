@@ -15,7 +15,7 @@ data class User(
     val lastName: String
 ) {
     companion object {
-        val sampleUser = User(1, "Harry", "Potter")
+        val sampleUser = User(1, "Job", "Seeker")
 
     }
 }

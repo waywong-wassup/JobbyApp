@@ -10,9 +10,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class JobApplicationViewModel (
-    private val jobApplicationRepository: JobApplicationRepository,
-    //include userRepository for now until user edit feature is implemented
-    private val userRepository: UserRepository
+    private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
     val uiState: StateFlow<JobApplicationUiState> = jobApplicationRepository.getAllJobApplications()
         .map<List<JobApplication>, JobApplicationUiState> { JobApplicationUiState.Success(it) }
