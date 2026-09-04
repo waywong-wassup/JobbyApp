@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.ThreadLocalRandom.current
 
 class UserViewModel(
     private val userRepository: UserRepository,
@@ -32,17 +34,32 @@ class UserViewModel(
     private val _changingUserDetails = MutableStateFlow<User?> (null)
     val changingUserDetails = _changingUserDetails.asStateFlow()
 
-    fun editSelectedUser(user: User) {
+    fun startEditingUser(user: User) {
         _changingUserDetails.value = user
     }
 
-    fun updateUserDetails(user: User) {
-        viewModelScope.launch {
-            userRepository.updateUser(user)
+    fun updateUserDraft(firstName: String, lastName: String) {
+        _changingUserDetails.update { currentUser ->
+            (currentUser ?: User(userId = 1, firstName = "", lastName = ""))
+                .copy(firstName = firstName, lastName = lastName)
         }
     }
 
-    fun addUserDetails(user: User) {
+    fun saveUserDraft() {
+        val changes = _changingUserDetails.value
+        if (changes != null) {
+            viewModelScope.launch {
+                try{
+                    saveUserToDatabase(changes)
+                } catch (e: Exception) {
+                    println("Error saving user: ${e.message}")
+                }
+            }
+        }
+
+    }
+
+    fun saveUserToDatabase(user: User) {
         viewModelScope.launch {
             userRepository.addUser(user)
         }
