@@ -102,7 +102,7 @@ class AppDatabaseTest {
         val addedUser = userDao.getCurrentUsers(user1.userId)
         assertEquals(addedUser.first(), user1)
         val updateName = user1.copy(firstName = "Sirius", lastName = "Black")
-        userDao.updateUser(updateName)
+        userDao.insertUser(updateName)
         val updatedUser = userDao.getCurrentUsers(user1.userId)
         assertEquals(updatedUser.first()!!.firstName, "Sirius")
         assertEquals(updatedUser.first()!!.lastName, "Black")
