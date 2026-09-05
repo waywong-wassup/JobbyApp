@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+    implementation("com.google.errorprone:error_prone_annotations:2.18.0")
 
     testImplementation(libs.junit)
     testImplementation("com.google.truth:truth:1.4.5")
@@ -77,6 +78,8 @@ dependencies {
     testImplementation("app.cash.turbine:turbine:1.2.1")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
 }
 
 configurations.all {
