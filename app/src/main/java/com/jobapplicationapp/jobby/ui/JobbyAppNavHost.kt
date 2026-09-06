@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,10 +19,11 @@ data class JobApplicationDetailsScreenRoute (val id: Int)
 
 @Composable
 fun JobbyAppNavHost(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController(),
+    jobApplicationViewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val navController = rememberNavController()
-
     NavHost(
         navController = navController,
         startDestination = JobApplicationListScreenRoute,
@@ -29,6 +31,8 @@ fun JobbyAppNavHost(
     ) {
         composable<JobApplicationListScreenRoute> {
             JobApplicationListScreen(
+                jobApplicationViewModel = jobApplicationViewModel,
+                userViewModel = userViewModel,
                 onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
                 onAddClick = {
                     navController.navigate(JobApplicationDetailsScreenRoute(0))
@@ -37,13 +41,6 @@ fun JobbyAppNavHost(
         }
         composable<JobApplicationDetailsScreenRoute> { backStack ->
             val details: JobApplicationDetailsScreenRoute = backStack.toRoute()
-
-            val jobApplicationViewModel: JobApplicationViewModel = viewModel(
-                factory = AppViewModelProvider.Factory
-            )
-            val userViewModel: UserViewModel = viewModel(
-                factory = AppViewModelProvider.Factory
-            )
 
             //LaunchedEffect, for running this code just once when this screen first appear
             LaunchedEffect(details.id) {

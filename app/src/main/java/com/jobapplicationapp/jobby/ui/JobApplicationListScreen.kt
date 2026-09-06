@@ -283,14 +283,14 @@ fun JobApplicationCard(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Home,
-                                    contentDescription = null,
+                                    contentDescription = "Remote Icon",
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.secondary
                                 )
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
-                                    contentDescription = null,
+                                    contentDescription = "Location Icon",
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.secondary
                                 )
@@ -330,7 +330,6 @@ fun getProgressColor(progress: String): Pair<Color, Color> {
             MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
         }
         else -> {
-
             MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
         }
     }
