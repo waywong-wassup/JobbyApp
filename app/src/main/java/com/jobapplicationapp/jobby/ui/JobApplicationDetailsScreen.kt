@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
@@ -252,6 +253,7 @@ fun JobApplicationDetailsForm(
                 label = { Text(stringResource(R.string.job_title)) },
                 modifier = Modifier.fillMaxWidth()
                                     .focusRequester(jobTitleFocusRequester)
+                                    .testTag("jobTitleError")
             )
 
             OutlinedTextField(
@@ -269,6 +271,7 @@ fun JobApplicationDetailsForm(
                 label = { Text(stringResource(R.string.company_name)) },
                 modifier = Modifier.fillMaxWidth()
                     .focusRequester(companyNameFocusRequester)
+                    .testTag("companyNameError")
             )
             OutlinedTextField(
                 value = currentJob.location ?: "",
