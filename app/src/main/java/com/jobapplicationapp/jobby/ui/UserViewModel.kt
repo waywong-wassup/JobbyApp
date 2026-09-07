@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadLocalRandom.current
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    userId: Int
+    userId: String
 ) : ViewModel() {
    val userUiState : StateFlow<UserUiState> = userRepository.getCurrentUser(userId)
        .map {user ->
@@ -40,7 +40,7 @@ class UserViewModel(
 
     fun updateUserDraft(firstName: String, lastName: String) {
         _changingUserDetails.update { currentUser ->
-            (currentUser ?: User(userId = 1, firstName = "", lastName = ""))
+            (currentUser ?: User(userId = "1", firstName = "", lastName = ""))
                 .copy(firstName = firstName, lastName = lastName)
         }
     }

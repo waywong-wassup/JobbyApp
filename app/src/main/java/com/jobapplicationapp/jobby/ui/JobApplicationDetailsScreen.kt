@@ -430,16 +430,16 @@ fun FormSection(
 
 
 class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
-    override fun getAllJobApplications() = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+    override fun getAllJobApplications(userId: String) = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
-    override fun getJobApplicationById(id: Int) = kotlinx.coroutines.flow.flowOf(null)
+    override fun getJobApplicationById(id: String) = kotlinx.coroutines.flow.flowOf(null)
 }
 class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
-    override fun getCurrentUser(userId: Int) = kotlinx.coroutines.flow.flowOf(null)
+    override fun getCurrentUser(userId: String) = kotlinx.coroutines.flow.flowOf(null)
 }
 
 @Preview (showBackground = true)
@@ -451,7 +451,7 @@ fun JobApplicationDetailsScreenPreview() {
         }
     }
     val dummyUserViewModel = remember {
-        UserViewModel(DummyUserRepository(), 1)
+        UserViewModel(DummyUserRepository(), "1")
     }
 
     AppTheme{

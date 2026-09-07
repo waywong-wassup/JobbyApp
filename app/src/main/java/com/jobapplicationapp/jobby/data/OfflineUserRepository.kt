@@ -10,6 +10,6 @@ class OfflineUserRepository(private val dao: UserDao) : UserRepository
     override suspend fun addUser(user: User) {
         dao.insertUser(user)
     }
-    override fun getCurrentUser(userId: Int) = dao.getCurrentUsers(userId)
+    override fun getCurrentUser(userId: String) = dao.getCurrentUsers(userId)
 
 }

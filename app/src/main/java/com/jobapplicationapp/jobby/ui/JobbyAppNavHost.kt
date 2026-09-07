@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 object JobApplicationListScreenRoute
 @Serializable
-data class JobApplicationDetailsScreenRoute (val id: Int)
+data class JobApplicationDetailsScreenRoute (val id: String)
 
 @Composable
 fun JobbyAppNavHost(
@@ -35,7 +35,7 @@ fun JobbyAppNavHost(
                 userViewModel = userViewModel,
                 onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
                 onAddClick = {
-                    navController.navigate(JobApplicationDetailsScreenRoute(0))
+                    navController.navigate(JobApplicationDetailsScreenRoute("0"))
                 }
             )
         }

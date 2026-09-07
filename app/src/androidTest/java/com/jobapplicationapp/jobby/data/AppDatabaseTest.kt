@@ -43,9 +43,9 @@ class AppDatabaseTest {
     }
 
     //Test data
-    private var user1 = User(1,"Harry", "Potter")
-    private var jobApplication1 = JobApplication(1,"Janitor", "Mom's basement", "Auckland",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired")
-    private var jobApplication2 = JobApplication(2,"Librarian","Library", "",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
+    private var user1 = User("1","Harry", "Potter")
+    private var jobApplication1 = JobApplication("1","Janitor", "Mom's basement", "Auckland",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired")
+    private var jobApplication2 = JobApplication("2","Librarian","Library", "",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
 
     @Test
     fun testInsertAndRetrieveOneJobApplication() = runBlocking {

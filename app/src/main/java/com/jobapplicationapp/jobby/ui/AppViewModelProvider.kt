@@ -11,12 +11,15 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            JobApplicationViewModel(jobbyApplication().container.jobApplicationRepository)
-    }
+            JobApplicationViewModel(
+                jobbyApplication().container.jobApplicationRepository,
+                "1" //temp sample user for now TODO: replace this when Firebase is ready
+            )
+        }
         initializer {
             UserViewModel(
                 jobbyApplication().container.userRepository,
-                1 //temp sample user for now TODO: replace this when Firebase is ready
+                "1" //temp sample user for now TODO: replace this when Firebase is ready
             )
         }
     }

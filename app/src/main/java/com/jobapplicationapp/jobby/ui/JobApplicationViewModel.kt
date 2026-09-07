@@ -10,9 +10,10 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class JobApplicationViewModel (
-    private val jobApplicationRepository: JobApplicationRepository
+    private val jobApplicationRepository: JobApplicationRepository,
+    private val userId: String
 ) : ViewModel() {
-    val uiState: StateFlow<JobApplicationUiState> = jobApplicationRepository.getAllJobApplications()
+    val uiState: StateFlow<JobApplicationUiState> = jobApplicationRepository.getAllJobApplications(userId)
         .map<List<JobApplication>, JobApplicationUiState> { JobApplicationUiState.Success(it) }
         .catch { emit(JobApplicationUiState.Error) }
         .stateIn(
@@ -69,11 +70,7 @@ class JobApplicationViewModel (
         if (changes != null && validateInput() == ValidationError.NONE) {
             viewModelScope.launch {
                 try {
-                    if (changes.jobApplicationId == 0) {
-                        addJobApplication(changes)
-                    } else {
-                        updateJobApplication(changes)
-                    }
+                    jobApplicationRepository.updateJobApplication(changes)
                 } catch (e: Exception) {
                     println("Error saving job application: ${e.message}")
                 }
@@ -85,13 +82,14 @@ class JobApplicationViewModel (
         _changingJobApplication.value = job
     }
 
-    fun loadJobApplication(id: Int) {
-        // id = 0 if add new job
-        if(id==0){
+    fun loadJobApplication(id: String) {
+        // id = "0" if add new job
+        if(id == "0"){
             _changingJobApplication.value = JobApplication(
+                userId = userId,
                 jobTitle = "",
                 companyName = "",
-                progress = "Applied",
+                progress = "To Apply",
                 location = "",
                 salary = null,
                 applicationURL = null,

@@ -67,7 +67,7 @@ fun JobApplicationListScreen(
     jobApplicationViewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory),
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
     modifier: Modifier = Modifier,
-    onEditClick: (Int) -> Unit = {},
+    onEditClick: (String) -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
     val jobUiState by jobApplicationViewModel.uiState.collectAsState()
@@ -188,7 +188,7 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
 @Composable
 fun JobApplicationList(
     jobApplications: List<JobApplication>,
-    onEditClick: (Int) -> Unit,
+    onEditClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ){
     LazyColumn(
