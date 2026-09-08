@@ -39,14 +39,15 @@ class JobApplicationViewModelTest {
         fakeJobRepository = FakeJobApplicationRepository()
         fakeUserRepository = FakeUserRepository()
         viewModel = JobApplicationViewModel(
-            fakeJobRepository
+            fakeJobRepository,
+            "1"
         )
     }
 
     @Test
     fun uiState_onRepositoryError_returnsError() = runTest {
         fakeJobRepository.shouldThrowError = true
-        val errorViewModel = JobApplicationViewModel(fakeJobRepository)
+        val errorViewModel = JobApplicationViewModel(fakeJobRepository, "1")
         errorViewModel.uiState.test {
             val finalState = expectMostRecentItem()
             assertEquals(JobApplicationUiState.Error, finalState)

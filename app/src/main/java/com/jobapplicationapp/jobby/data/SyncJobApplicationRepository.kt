@@ -34,7 +34,7 @@ class SyncJobApplicationRepository(
     }
 
     override suspend fun updateJobApplication(jobApplication: JobApplication) {
-        addJobApplication(jobApplication)
+        addJobApplication(jobApplication) //same action as addJobApplication
     }
 
     override suspend fun deleteJobApplication(jobApplication: JobApplication) {
