@@ -59,10 +59,8 @@ class UserViewModel(
 
     }
 
-    fun saveUserToDatabase(user: User) {
-        viewModelScope.launch {
+    suspend fun saveUserToDatabase(user: User) {
             userRepository.addUser(user)
-        }
     }
 
 
