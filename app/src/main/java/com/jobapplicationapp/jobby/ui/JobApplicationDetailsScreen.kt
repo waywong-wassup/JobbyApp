@@ -445,7 +445,7 @@ class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
 @Composable
 fun JobApplicationDetailsScreenPreview() {
     val dummyJobApplicationViewModel = remember {
-        JobApplicationViewModel(DummyJobRepository(), "1").apply {
+        JobApplicationViewModel(DummyJobRepository()).apply {
             selectJob(JobApplication.sampleJobApplication[1])
         }
     }
