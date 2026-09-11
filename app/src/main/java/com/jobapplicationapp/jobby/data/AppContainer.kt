@@ -9,6 +9,7 @@ import kotlinx.coroutines.MainScope
 interface AppContainer {
     val jobApplicationRepository: JobApplicationRepository
     val userRepository: UserRepository
+    val authRepository: AuthRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -23,6 +24,10 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val userRepository: UserRepository by lazy {
         OfflineUserRepository(AppDatabase.getDatabase(context).userDao())
+    }
+
+    override val authRepository: AuthRepository by lazy {
+        FirebaseAuthRepository(Firebase.auth)
     }
 
 }

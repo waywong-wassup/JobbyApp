@@ -38,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -446,12 +445,12 @@ class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
 @Composable
 fun JobApplicationDetailsScreenPreview() {
     val dummyJobApplicationViewModel = remember {
-        JobApplicationViewModel(DummyJobRepository(), "1").apply {
+        JobApplicationViewModel(DummyJobRepository()).apply {
             selectJob(JobApplication.sampleJobApplication[1])
         }
     }
     val dummyUserViewModel = remember {
-        UserViewModel(DummyUserRepository(), "1")
+        UserViewModel(DummyUserRepository())
     }
 
     AppTheme{

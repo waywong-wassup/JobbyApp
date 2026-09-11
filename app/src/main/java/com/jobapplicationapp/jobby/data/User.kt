@@ -4,6 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
 
+const val OFFLINE_USER_ID = "offline_user"
+
 /**
  * Data class to represent user
  */
@@ -18,7 +20,8 @@ data class User(
     val isSynced: Boolean = false
 ) {
     companion object {
-        val sampleUser = User("1", "Job", "Seeker")
+        val guestUser = User(userId = OFFLINE_USER_ID, firstName = "Guest", lastName = "User")
+        val sampleUser = User("sample_user", "Sampler", "User")
 
     }
 }

@@ -76,7 +76,7 @@ fun JobApplicationListScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            val user = (userUiState as? UserUiState.Success)?.user ?: User.sampleUser
+            val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
             JobbyTopBar(user = user, onEditUserDetailsClick = {
                 userViewModel.startEditingUser(user)
                 showUserDetailsEditSheet = true })
@@ -105,7 +105,7 @@ fun JobApplicationListScreen(
                     modifier = Modifier.padding(innerPadding)
                 )
                 if (showUserDetailsEditSheet) {
-                    val user = (userUiState as? UserUiState.Success)?.user ?: User.sampleUser
+                    val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
                     EditUserDetailsBottomSheet(
                         onDismiss = { showUserDetailsEditSheet = false },
                         onSave = { firstName, lastName ->
@@ -362,7 +362,7 @@ private fun JobbyTopBarPreview() {
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember { JobApplicationViewModel(DummyJobRepository()) }
-    val dummyUserViewModel = remember { UserViewModel(DummyUserRepository(), 1) }
+    val dummyUserViewModel = remember { UserViewModel(DummyUserRepository()) }
 
     AppTheme {
         JobApplicationListScreen(

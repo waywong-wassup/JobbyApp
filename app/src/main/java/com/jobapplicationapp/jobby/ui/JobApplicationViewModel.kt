@@ -8,14 +8,24 @@ import com.jobapplicationapp.jobby.data.JobApplication
 import com.jobapplicationapp.jobby.data.UserRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 
 class JobApplicationViewModel (
-    private val jobApplicationRepository: JobApplicationRepository,
-    private val userId: String
+    private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
-    val uiState: StateFlow<JobApplicationUiState> = jobApplicationRepository.getAllJobApplications(userId)
-        .map<List<JobApplication>, JobApplicationUiState> { JobApplicationUiState.Success(it) }
-        .catch { emit(JobApplicationUiState.Error) }
+    private val _userId = MutableStateFlow<String?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<JobApplicationUiState> = _userId
+        .filterNotNull()
+        .flatMapLatest { userId -> jobApplicationRepository.getAllJobApplications(userId)}
+            .map<List<JobApplication>, JobApplicationUiState> {
+                JobApplicationUiState.Success(it)
+            }
+        .catch {
+           emit(JobApplicationUiState.Error)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -86,7 +96,7 @@ class JobApplicationViewModel (
         // id = "0" if add new job
         if(id == "0"){
             _changingJobApplication.value = JobApplication(
-                userId = userId,
+                userId = _userId.value ?: "1",
                 jobTitle = "",
                 companyName = "",
                 progress = "To Apply",
@@ -125,6 +135,10 @@ class JobApplicationViewModel (
             job.companyName.isBlank() -> ValidationError.COMPANY_NAME_REQUIRED
             else -> ValidationError.NONE
         }
+    }
+
+    fun setUserId(id: String) {
+        _userId.value = id
     }
 
  }

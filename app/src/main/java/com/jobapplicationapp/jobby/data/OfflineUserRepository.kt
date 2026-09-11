@@ -1,6 +1,5 @@
 package com.jobapplicationapp.jobby.data
 
-import kotlinx.coroutines.flow.Flow
 
 class OfflineUserRepository(private val dao: UserDao) : UserRepository
 {

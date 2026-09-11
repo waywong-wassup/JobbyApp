@@ -33,16 +33,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 
 @Composable
 fun StartScreen(
+    authViewModel: AuthViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onLoginSuccess: () -> Unit = {},
     onSkipLogin: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?> (null)}
 
     Column(
         modifier = Modifier
@@ -59,7 +62,7 @@ fun StartScreen(
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Your Job Search Companion",
+            text = "Your Job Search Buddy",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.outline
         )
@@ -91,12 +94,45 @@ fun StartScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Login Button
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage!!,
+                color = MaterialTheme.colorScheme.error)
+        }
+
         Button(
-            onClick = onLoginSuccess,
+            onClick = {
+                authViewModel.signIn(email,password) {
+                    result ->
+                    if(result.isSuccess){
+                        onLoginSuccess()
+                    } else {
+                        errorMessage =result.exceptionOrNull()?.message ?: "Login Failed"
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium
         ) {
             Text("Login", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = {
+                authViewModel.signUp(email, password)
+                { result ->
+                    if (result.isSuccess) {
+                        onLoginSuccess()
+                    } else {
+                        errorMessage = result.exceptionOrNull()?.message ?: "Sign Up Failed"
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Text("Sign Up", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
