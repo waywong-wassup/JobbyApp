@@ -46,6 +46,9 @@ fun StartScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?> (null)}
+    var isSignUpMode by remember { mutableStateOf(false) }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -68,6 +71,26 @@ fun StartScreen(
         )
 
         Spacer(modifier = Modifier.height(48.dp))
+
+        //display first name and last name if in sign up mode
+        if (isSignUpMode) {
+            OutlinedTextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("First Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         // Email & Password Fields
         OutlinedTextField(
@@ -93,46 +116,42 @@ fun StartScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Login Button
+        // Error message display
         if (errorMessage != null) {
             Text(
                 text = errorMessage!!,
-                color = MaterialTheme.colorScheme.error)
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
 
-        Button(
-            onClick = {
-                authViewModel.signIn(email,password) {
-                    result ->
-                    if(result.isSuccess){
-                        onLoginSuccess()
-                    } else {
-                        errorMessage =result.exceptionOrNull()?.message ?: "Login Failed"
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Text("Login", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
+        // Login OR Sign up button
         OutlinedButton(
             onClick = {
-                authViewModel.signUp(email, password)
-                { result ->
-                    if (result.isSuccess) {
-                        onLoginSuccess()
-                    } else {
-                        errorMessage = result.exceptionOrNull()?.message ?: "Sign Up Failed"
+                if (isSignUpMode){
+                    authViewModel.signUp(email, password, firstName, lastName)
+                    { result ->
+                        if (result.isSuccess) {
+                            onLoginSuccess()
+                        } else {
+                            errorMessage = result.exceptionOrNull()?.message ?: "Sign Up Failed"
+                        }
+                    }
+                }else {
+                    authViewModel.signIn(email, password) { result ->
+                        if (result.isSuccess) onLoginSuccess()
+                        else errorMessage = result.exceptionOrNull()?.message ?: "Login Failed"
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium
         ) {
-            Text("Sign Up", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+            Text(if (isSignUpMode) "Create Account" else "Login", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+        }
+        TextButton(onClick = { isSignUpMode = !isSignUpMode }) {
+            Text(if (isSignUpMode) "Already have an account? Login" else "Don't have an account? Sign Up")
         }
 
         Spacer(modifier = Modifier.height(24.dp))

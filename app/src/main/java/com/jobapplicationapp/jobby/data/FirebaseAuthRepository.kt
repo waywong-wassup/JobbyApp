@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.auth.userProfileChangeRequest
 
 /**
  * implementation of AuthRepository using Firebase.
@@ -45,10 +46,17 @@ class FirebaseAuthRepository(
 
     override suspend fun signUpWithEmailAndPassword(
         email: String,
-        password: String
+        password: String,
+        firstName: String,
+        lastName: String
     ): Result<Unit> {
         return try {
             auth.createUserWithEmailAndPassword(email, password).await()
+            val user = auth.currentUser
+            val profileUpdates = userProfileChangeRequest {
+                displayName = "$firstName $lastName"
+            }
+            user?.updateProfile(profileUpdates)?.await()
             Result.success(Unit)
         } catch (e: Exception) {
             // If  email is already in use or the password is too weak, fail here

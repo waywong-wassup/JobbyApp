@@ -5,6 +5,7 @@ import com.jobapplicationapp.jobby.data.JobApplicationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
 import com.jobapplicationapp.jobby.data.JobApplication
+import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.UserRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -96,7 +97,7 @@ class JobApplicationViewModel (
         // id = "0" if add new job
         if(id == "0"){
             _changingJobApplication.value = JobApplication(
-                userId = _userId.value ?: "1",
+                userId = _userId.value ?: OFFLINE_USER_ID,
                 jobTitle = "",
                 companyName = "",
                 progress = "To Apply",

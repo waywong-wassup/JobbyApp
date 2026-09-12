@@ -45,9 +45,9 @@ fun JobbyAppNavHost(
 
             userViewModel.saveUserToDatabase( // then save this user to DB
                 User(
-                    userId = userUiState!!.uid,
-                    firstName = userUiState!!.displayName?.substringBefore(" ") ?: "Guest", // save displayname as first name if exists else fall to default
-                    lastName = userUiState!!.displayName?.substringAfter(" ") ?: "User"
+                    userId = uid,
+                    firstName = userUiState!!.displayName?.substringBefore(" ") ?: "New",
+                    lastName = userUiState!!.displayName?.substringAfter(" ", "")?.ifBlank { "User" } ?: "User"
                 )
             )
             // if has user logged in/signed in when app launch, skip StartScreen and go to ListScreen directly

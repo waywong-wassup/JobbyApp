@@ -26,9 +26,9 @@ class AuthViewModel(
         }
     }
 
-    fun signUp(email: String, password: String, onResult: (Result<Unit>) -> Unit) {
+    fun signUp(email: String, password: String, firstName: String, lastName: String, onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch {
-            val result = authRepository.signUpWithEmailAndPassword(email, password)
+            val result = authRepository.signUpWithEmailAndPassword(email, password, firstName, lastName)
             onResult(result)
         }
     }
