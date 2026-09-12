@@ -1,13 +1,17 @@
 # Jobby 💼
 
-**Jobby** is a modern, offline-first Android application designed to be your ultimate job search buddy. Built with Jetpack Compose and Firebase, it helps you organize your job hunt by tracking applications, interviews, and offers in one centralized place.
+**Jobby** is a modern, offline-first Android application designed to be your ultimate job search buddy. Built with Jetpack Compose and Firebase, it helps you organise your job hunt by tracking applications, interviews, and offers in one centralised place.
+
+<img width="150" height="150" alt="Screenshot 2026-08-18 221358" src="https://github.com/user-attachments/assets/51c8db0b-fda5-4990-8a23-dc5979e205d8" />
+
+(originally, the sign the person holding in the app icon was "hire me plz" 😏)
 
 ## 🚀 Features
 
 *   **Offline-First Architecture:** Your data is always accessible. View and edit your job applications even without an internet connection.
 *   **Firebase Integration:** 
     *   **Authentication:** Secure login and sign-up using Firebase Email/Password.
-    *   **Cloud Sync:** Optional real-time synchronization between your local database (Room) and the cloud (Firestore).
+    *   **Cloud Sync:** Optional real-time synchronisation between your local database (Room) and the cloud (Firestore).
 *   **Offline Mode:** Start tracking jobs immediately without an account; your data will be saved locally.
 *   **Comprehensive Tracking:** Manage detailed job information including:
     *   Job Title & Company
@@ -21,6 +25,7 @@
 *   **Language:** [Kotlin](https://kotlinlang.org/)
 *   **UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) (Material 3)
 *   **Database (Local):** [Room](https://developer.android.com/training/data-storage/room)
+
 *   **Backend:** [Firebase](https://firebase.google.com/) (Auth, Firestore, Analytics)
 *   **Architecture:** MVVM + Repository Pattern + Offline-First Sync Logic
 *   **Navigation:** Jetpack Navigation Compose (Type-safe routes)
@@ -28,7 +33,7 @@
 
 ## 🏗 Architecture
 
-Jobby follows a specialized **Offline-First** architecture. The UI always reads from the local Room database, ensuring the app is always fast and responsive. A "Sync" layer sits between the local and remote repositories, handling the logic of pushing updates to Firestore when a connection is available.
+Jobby follows the **Offline-First** architecture. The UI always reads from the local Room database, ensuring the app is always fast and responsive. A "Sync" layer sits between the local and remote repositories, handling the logic of pushing updates to Firestore when a connection is available.
 
 ```mermaid
 graph TD
@@ -56,6 +61,3 @@ graph TD
     *   Enable **Cloud Firestore**.
 3.  **Build & Run:**
     *   Sync Gradle and run the app on your emulator or physical device.
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
