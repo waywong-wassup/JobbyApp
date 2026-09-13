@@ -16,14 +16,15 @@ class UserViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    val testUser1 = User(1, "testFirstName", "testLastName")
+    val testUser1 = User("1", "testFirstName", "testLastName")
     private lateinit var fakeUserRepository: FakeUserRepository
     private lateinit var userViewModel: UserViewModel
 
     @Before
     fun setup() {
         fakeUserRepository = FakeUserRepository()
-        userViewModel = UserViewModel(fakeUserRepository,0)
+        userViewModel = UserViewModel(fakeUserRepository)
+        userViewModel.setUserId("1")
     }
 
     @Test
@@ -34,7 +35,8 @@ class UserViewModelTest {
 
     @Test
     fun userUiState_userNotFoundInDatabase_returnsErrorState() = runTest {
-        val emptyViewModel = UserViewModel(fakeUserRepository, userId = 99)
+        val emptyViewModel = UserViewModel(fakeUserRepository)
+        emptyViewModel.setUserId("99")
 
         emptyViewModel.userUiState.test {
             assertEquals(UserUiState.Error, awaitItem())
@@ -43,20 +45,27 @@ class UserViewModelTest {
 
     @Test
     fun updateUserDraft_withValidInput_userDraftUpdated() {
-        userViewModel.saveUserToDatabase(testUser1)
+        runTest {
+            userViewModel.saveUserToDatabase(testUser1)
+        }
         userViewModel.startEditingUser(testUser1)
         userViewModel.updateUserDraft(firstName = "newFirstName", lastName = "newLastName")
         val result = userViewModel.changingUserDetails.value
-        assertEquals(User(1, "newFirstName", "newLastName"), result)
+        assertNotNull(result)
+        assertEquals("1", result?.userId)
+        assertEquals("newFirstName", result?.firstName)
+        assertEquals("newLastName", result?.lastName)
     }
 
     @Test
-    fun updateUserDraft_noUserLoadedInitially_initialisedWithDefaultId() = runTest {
+    fun updateUserDraft_noUserLoadedInitially_initialisedWithCurrentId() = runTest {
         assertNull(userViewModel.changingUserDetails.value)
         userViewModel.updateUserDraft(firstName = "newFirstName", lastName = "newLastName")
         val result = userViewModel.changingUserDetails.value
         assertNotNull(result)
-        assertEquals(User(1, "newFirstName", "newLastName"), result)
+        assertEquals("1", result?.userId)
+        assertEquals("newFirstName", result?.firstName)
+        assertEquals("newLastName", result?.lastName)
     }
 
     @Test
@@ -71,7 +80,7 @@ class UserViewModelTest {
     @Test
     fun saveUserDraft_insertNewUser_userAddedToRepository() = runTest {
         userViewModel.saveUserToDatabase(testUser1)
-        fakeUserRepository.getCurrentUser(1).test {
+        fakeUserRepository.getCurrentUser("1").test {
             val user = awaitItem()
             assertEquals(testUser1, user)
         }
@@ -80,18 +89,19 @@ class UserViewModelTest {
     @Test
     fun saveUserDraft_insertExistingUser_userUpdatedInRepository() = runTest {
         userViewModel.saveUserToDatabase(testUser1)
-        fakeUserRepository.getCurrentUser(1).test {
+        fakeUserRepository.getCurrentUser("1").test {
             val user = awaitItem()
             assertEquals(testUser1, user)
         }
         userViewModel.startEditingUser(testUser1)
         userViewModel.updateUserDraft(firstName = "newFirstName", lastName = "newLastName")
         userViewModel.saveUserDraft()
-        fakeUserRepository.getCurrentUser(1).test {
+        fakeUserRepository.getCurrentUser("1").test {
             val user = awaitItem()
-            assertEquals(User(1, "newFirstName", "newLastName"), user)
+            assertNotNull(user)
+            assertEquals("1", user?.userId)
+            assertEquals("newFirstName", user?.firstName)
+            assertEquals("newLastName", user?.lastName)
         }
     }
-
-
 }

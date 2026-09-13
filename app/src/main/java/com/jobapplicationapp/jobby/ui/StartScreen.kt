@@ -41,12 +41,13 @@ import com.jobapplicationapp.jobby.ui.theme.AppTheme
 fun StartScreen(
     authViewModel: AuthViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onLoginSuccess: () -> Unit = {},
-    onSkipLogin: () -> Unit = {}
+    onSkipLogin: (String, String) -> Unit = { _, _ -> }
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?> (null)}
     var isSignUpMode by remember { mutableStateOf(false) }
+    var isGuestMode by remember { mutableStateOf(false) }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
 
@@ -57,6 +58,7 @@ fun StartScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        //top part with title and icon, which shows up in all modes.
         JobbyAppIcon(modifier = Modifier.size(80.dp))
         Text(
             text = "Jobby",
@@ -72,8 +74,8 @@ fun StartScreen(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        //display first name and last name if in sign up mode
-        if (isSignUpMode) {
+        // display first name and last name if in sign up mode OR guest mode
+        if (isSignUpMode || isGuestMode) {
             OutlinedTextField(
                 value = firstName,
                 onValueChange = { firstName = it },
@@ -92,29 +94,31 @@ fun StartScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Email & Password Fields
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true
-        )
+        // Email and password fields, only if not in guest mode
+        if (!isGuestMode) {
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
-        )
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         // Error message display
         if (errorMessage != null) {
@@ -126,60 +130,83 @@ fun StartScreen(
             )
         }
 
-        // Login OR Sign up button
+        // Action Button: Login, Create Account, or Start as Guest
         OutlinedButton(
             onClick = {
-                if (isSignUpMode){
-                    authViewModel.signUp(email, password, firstName, lastName)
-                    { result ->
-                        if (result.isSuccess) {
-                            onLoginSuccess()
-                        } else {
-                            errorMessage = result.exceptionOrNull()?.message ?: "Sign Up Failed"
+                when {
+                    isGuestMode -> {
+                        onSkipLogin(firstName, lastName)
+                    }
+                    isSignUpMode -> {
+                        authViewModel.signUp(email, password, firstName, lastName) { result ->
+                            if (result.isSuccess) {
+                                onLoginSuccess()
+                            } else {
+                                errorMessage = result.exceptionOrNull()?.message ?: "Sign Up Failed"
+                            }
                         }
                     }
-                }else {
-                    authViewModel.signIn(email, password) { result ->
-                        if (result.isSuccess) onLoginSuccess()
-                        else errorMessage = result.exceptionOrNull()?.message ?: "Login Failed"
+                    else -> {
+                        authViewModel.signIn(email, password) { result ->
+                            if (result.isSuccess) onLoginSuccess()
+                            else errorMessage = result.exceptionOrNull()?.message ?: "Login Failed"
+                        }
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium
         ) {
-            Text(if (isSignUpMode) "Create Account" else "Login", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
-        }
-        TextButton(onClick = { isSignUpMode = !isSignUpMode }) {
-            Text(if (isSignUpMode) "Already have an account? Login" else "Don't have an account? Sign Up")
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // OR Divider
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            HorizontalDivider(modifier = Modifier.weight(1f))
             Text(
-                text = " OR ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                text = when {
+                    isGuestMode -> "Start as Guest"
+                    isSignUpMode -> "Create Account"
+                    else -> "Login"
+                },
+                fontSize = 16.sp,
+                modifier = Modifier.padding(8.dp)
             )
-            HorizontalDivider(modifier = Modifier.weight(1f))
+        }
+
+        // Toggle between modes
+        if (!isGuestMode) {
+            TextButton(onClick = { isSignUpMode = !isSignUpMode }) {
+                Text(if (isSignUpMode) "Already have an account? Login" else "Don't have an account? Sign Up")
+            }
+        } else {
+            TextButton(onClick = { isGuestMode = false }) {
+                Text("Back to Login/Sign Up")
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Social Login
-        LoginGoogleAccountField(onClick = onLoginSuccess)
+        // OR Divider - only if not in guest mode
+        if (!isGuestMode) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f))
+                Text(
+                    text = " OR ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f))
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        // Skip Login
-        SkipLogin(onClick = onSkipLogin)
+            // Social Login
+            LoginGoogleAccountField(onClick = onLoginSuccess)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Skip Login
+            SkipLogin(onClick = { isGuestMode = true })
+        }
     }
 }
 

@@ -38,7 +38,8 @@ class JobbyAppNavHostTest {
         jobType = null,
         applicationPostedDate = null,
         notes = null,
-        salary = null
+        salary = null,
+        userId = "1"
     )
 
     // Fake Repositories to avoid real database usage
@@ -67,8 +68,10 @@ class JobbyAppNavHostTest {
         jobRepository: JobApplicationRepository = FakeJobRepository(),
         userRepository: UserRepository = FakeUserRepository()
     ) {
-        val jobViewModel = JobApplicationViewModel(jobRepository, "1")
-        val userViewModel = UserViewModel(userRepository, "1")
+        val jobViewModel = JobApplicationViewModel(jobRepository)
+        jobViewModel.setUserId("1")
+        val userViewModel = UserViewModel(userRepository)
+        userViewModel.setUserId("1")
 
         composeTestRule.setContent {
             navController = TestNavHostController(LocalContext.current)

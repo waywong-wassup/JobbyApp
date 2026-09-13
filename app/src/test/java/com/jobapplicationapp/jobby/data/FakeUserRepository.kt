@@ -18,7 +18,7 @@ class FakeUserRepository : UserRepository {
         usersFlow.update { list -> list.filterNot {it.userId == user.userId} + user}
     }
 
-    override fun getCurrentUser(userId: Int): Flow<User?> {
+    override fun getCurrentUser(userId: String): Flow<User?> {
         return usersFlow.map { list ->
             list.find { it.userId == userId }
         }

@@ -44,49 +44,52 @@ class AppDatabaseTest {
 
     //Test data
     private var user1 = User("1","Harry", "Potter")
-    private var jobApplication1 = JobApplication("1","Janitor", "Mom's basement", "Auckland",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired")
-    private var jobApplication2 = JobApplication("2","Librarian","Library", "",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
+    private var jobApplication1 = JobApplication("1","1","Janitor", "Mom's basement", "Auckland",50000L, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired")
+    private var jobApplication2 = JobApplication("2","1","Librarian","Library", "",30000L, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
 
     @Test
     fun testInsertAndRetrieveOneJobApplication() = runBlocking {
+        userDao.insertUser(user1) // Need to insert user first due to FK
         jobApplicationDao.addJobApplication(jobApplication1)
-        val addedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        val addedJobApplication = jobApplicationDao.getAllJobApplications("1").first()
         assertEquals(addedJobApplication[0], jobApplication1)
     }
 
     @Test
     fun testInsertAndRetrieveMultipleJobApplication() = runBlocking {
+        userDao.insertUser(user1)
         jobApplicationDao.addJobApplication(jobApplication1)
         jobApplicationDao.addJobApplication(jobApplication2)
-        val addedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        val addedJobApplication = jobApplicationDao.getAllJobApplications("1").first()
         assertEquals(addedJobApplication[0], jobApplication1)
         assertEquals(addedJobApplication[1], jobApplication2)
     }
 
     @Test
     fun testInsertAndRetrieveMultipleJobApplicationAndDeleteOne() = runBlocking {
+        userDao.insertUser(user1)
         jobApplicationDao.addJobApplication(jobApplication1)
         jobApplicationDao.addJobApplication(jobApplication2)
-        val addedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        val addedJobApplication = jobApplicationDao.getAllJobApplications("1").first()
         assertEquals(addedJobApplication[0], jobApplication1)
         assertEquals(addedJobApplication[1], jobApplication2)
 
         jobApplicationDao.deleteJobApplication(jobApplication1)
-        val deletedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        val deletedJobApplication = jobApplicationDao.getAllJobApplications("1").first()
         //verify only one job application left in the database
         assertEquals(deletedJobApplication[0], jobApplication2)
     }
 
     @Test
     fun testInsertAndUpdateJobApplication() = runBlocking {
+        userDao.insertUser(user1)
         jobApplicationDao.addJobApplication(jobApplication1)
-        val addedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        val addedJobApplication = jobApplicationDao.getAllJobApplications("1").first()
         assertEquals(addedJobApplication[0], jobApplication1)
         val updateDetails = jobApplication1.copy(jobTitle = "Mail Man", companyName = "Hedwig",location = "under staircases")
         jobApplicationDao.updateJobApplication(updateDetails)
-        val updatedJobApplication = jobApplicationDao.getAllJobApplications().first()
+        val updatedJobApplication = jobApplicationDao.getAllJobApplications("1").first()
         assertEquals(updatedJobApplication[0], updateDetails)
-
     }
 
     @Test

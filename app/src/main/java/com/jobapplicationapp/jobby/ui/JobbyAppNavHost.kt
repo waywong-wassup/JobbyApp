@@ -86,14 +86,18 @@ fun JobbyAppNavHost(
                         popUpTo(StartScreenRoute) { inclusive = true } // remove StartScreen from backstack, inclusive = true means including remove StartScreen
                     }
                 },
-                onSkipLogin = {
+                onSkipLogin = { firstName, lastName ->
                     // set offline user id if user choose not to login
                     jobApplicationViewModel.setUserId(OFFLINE_USER_ID)
                     userViewModel.setUserId(OFFLINE_USER_ID)
 
                     scope.launch {
                         userViewModel.saveUserToDatabase(
-                            User(User.guestUser.userId, User.guestUser.firstName, User.guestUser.lastName)
+                            User(
+                                userId = OFFLINE_USER_ID,
+                                firstName = firstName.ifBlank { "Guest" },
+                                lastName = lastName.ifBlank { "User" }
+                            )
                         )
                     }
 
