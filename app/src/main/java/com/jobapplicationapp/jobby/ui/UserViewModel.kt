@@ -2,6 +2,7 @@ package com.jobapplicationapp.jobby.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.User
 import com.jobapplicationapp.jobby.data.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,11 +17,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.jobapplicationapp.jobby.data.JobApplicationRepository
+import com.jobapplicationapp.jobby.data.SyncJobApplicationRepository
+
 
 class UserViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
     private val _userId = MutableStateFlow<String?>(null)
+    private val _isSyncEnabled = MutableStateFlow(false)
+    val isSyncEnabledState = _isSyncEnabled.asStateFlow()
 
    @OptIn(ExperimentalCoroutinesApi::class)
    val userUiState : StateFlow<UserUiState> = _userId
@@ -38,6 +45,9 @@ class UserViewModel(
 
     fun setUserId(id: String) {
         _userId.value = id
+        if (id == OFFLINE_USER_ID) {
+            setSyncEnabled(false)
+        }
     }
 
     //for reflecting change on ui
@@ -47,8 +57,6 @@ class UserViewModel(
     fun startEditingUser(user: User) {
         _changingUserDetails.value = user
     }
-
-
 
     fun updateUserDraft(firstName: String, lastName: String) {
         _changingUserDetails.update { currentUser ->
@@ -68,10 +76,25 @@ class UserViewModel(
                 }
             }
         }
-
     }
 
     suspend fun saveUserToDatabase(user: User) {
             userRepository.addUser(user)
+    }
+
+//    fun toggleSync(enabled: Boolean)
+//        _isSyncEnabled.value = !_isSyncEnabled.value
+//    }
+
+    fun setSyncEnabled(enabled: Boolean) {
+        _isSyncEnabled.value = enabled
+
+        // Push the setting to the repository
+        // We cast it because JobApplicationRepository is an interface and is in constructor of this VM,
+        // but SyncJobApplicationRepository is the one with the flag.
+        // if we're directly using SyncJobApplicationRepository, then we will need to implement isSyncEnabled for viewModel,
+        // which make this viewModel not usable for Offline only mode
+        // how to avoid "as?" cast in the future: create a UserPreference class/repository for handling this toggle.
+        (jobApplicationRepository as? SyncJobApplicationRepository)?.isSyncEnabled = enabled
     }
 }

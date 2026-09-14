@@ -6,12 +6,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.jobapplicationapp.jobby.JobbyApplication
 import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.User
 import kotlinx.coroutines.launch
@@ -35,6 +37,7 @@ fun JobbyAppNavHost(
     val userUiState by authViewModel.currentUser.collectAsState()
     val localUserUiState by userViewModel.userUiState.collectAsState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // first handle Firebase Login
     LaunchedEffect(userUiState) {
@@ -42,6 +45,9 @@ fun JobbyAppNavHost(
             val uid = userUiState!!.uid
             jobApplicationViewModel.setUserId(uid)
             userViewModel.setUserId(uid)
+
+            // Start background sync
+            (context.applicationContext as JobbyApplication).scheduleSync(uid)
 
             userViewModel.saveUserToDatabase( // then save this user to DB
                 User(
@@ -83,7 +89,8 @@ fun JobbyAppNavHost(
             StartScreen(
                 onLoginSuccess = {
                     navController.navigate(JobApplicationListScreenRoute) {
-                        popUpTo(StartScreenRoute) { inclusive = true } // remove StartScreen from backstack, inclusive = true means including remove StartScreen
+                        popUpTo(StartScreenRoute) { inclusive = true }
+                    // remove StartScreen from backstack, inclusive = true means including remove StartScreen
                     }
                 },
                 onSkipLogin = { firstName, lastName ->

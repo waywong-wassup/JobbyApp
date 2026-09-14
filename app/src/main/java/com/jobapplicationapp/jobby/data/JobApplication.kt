@@ -24,18 +24,18 @@ import java.util.UUID
 data class JobApplication(
     @PrimaryKey
     val jobApplicationId: String = UUID.randomUUID().toString(),
-    val userId: String,
-    var jobTitle: String,
-    var companyName: String,
-    var location: String?,
-    var salary: Long?, // save as cents and convert to decimal points later
-    var applicationURL: String?,
-    var progress: String,
-    var contactName: String?,
-    var contactDetails: String?,
-    var jobType: String?,
-    var applicationPostedDate: String?,
-    var notes: String?,
+    val userId: String = "",
+    var jobTitle: String = "",
+    var companyName: String = "",
+    var location: String?= null,
+    var salary: Long? = null, // save as cents and convert to decimal points later
+    var applicationURL: String? = null,
+    var progress: String = "To Apply" ,
+    var contactName: String? = null,
+    var contactDetails: String? = null,
+    var jobType: String? = null,
+    var applicationPostedDate: String? = null,
+    var notes: String? = null,
     var lastModified: Long = System.currentTimeMillis(),
     var isSynced: Boolean = false
 )  {

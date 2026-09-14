@@ -24,7 +24,8 @@ object AppViewModelProvider {
         }
         initializer {
             UserViewModel(
-                jobbyApplication().container.userRepository
+                jobbyApplication().container.userRepository,
+                jobbyApplication().container.jobApplicationRepository
             )
         }
     }

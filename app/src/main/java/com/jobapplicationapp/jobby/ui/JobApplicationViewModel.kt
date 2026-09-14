@@ -100,7 +100,7 @@ class JobApplicationViewModel (
                 userId = _userId.value ?: OFFLINE_USER_ID,
                 jobTitle = "",
                 companyName = "",
-                progress = "To Apply",
+                progress = "Applied",
                 location = "",
                 salary = null,
                 applicationURL = null,

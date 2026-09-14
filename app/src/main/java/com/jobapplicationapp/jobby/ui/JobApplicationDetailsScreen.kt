@@ -450,7 +450,7 @@ fun JobApplicationDetailsScreenPreview() {
         }
     }
     val dummyUserViewModel = remember {
-        UserViewModel(DummyUserRepository())
+        UserViewModel(DummyUserRepository(),DummyJobRepository())
     }
 
     AppTheme{

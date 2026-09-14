@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -81,7 +82,8 @@ fun StartScreen(
                 onValueChange = { firstName = it },
                 label = { Text("First Name") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
@@ -89,7 +91,8 @@ fun StartScreen(
                 onValueChange = { lastName = it },
                 label = { Text("Last Name") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
