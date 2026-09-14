@@ -6,17 +6,28 @@ import com.google.firebase.auth.FirebaseUser
 import com.jobapplicationapp.jobby.data.AuthRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val authRepository: AuthRepository
 ): ViewModel() {
+    val authUiState: StateFlow<AuthUiState> = authRepository.currentUser
+        .map { user ->
+            if (user != null) AuthUiState.Success(user) else AuthUiState.Error
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = AuthUiState.Loading
+        )
+
     val currentUser: StateFlow<FirebaseUser?> = authRepository.currentUser
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null //Todo - should this be default value?
+            initialValue = null
         )
 
     fun signIn(email: String, password: String, onResult: (Result<Unit>) -> Unit) {

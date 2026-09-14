@@ -16,6 +16,7 @@ import androidx.navigation.toRoute
 import com.jobapplicationapp.jobby.JobbyApplication
 import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.User
+import com.jobapplicationapp.jobby.ui.components.LoadingScreen
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -34,15 +35,22 @@ fun JobbyAppNavHost(
     jobApplicationViewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory),
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val userUiState by authViewModel.currentUser.collectAsState()
+    val authUiState by authViewModel.authUiState.collectAsState()
     val localUserUiState by userViewModel.userUiState.collectAsState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    // first handle Firebase Login
-    LaunchedEffect(userUiState) {
-        if (userUiState != null) { 
-            val uid = userUiState!!.uid
+    // Wait until the initial auth check is finished
+    if (authUiState is AuthUiState.Loading) {
+        LoadingScreen()
+        return
+    }
+
+    // handle Firebase Login status changes
+    LaunchedEffect(authUiState) {
+        if (authUiState is AuthUiState.Success) { 
+            val user = (authUiState as AuthUiState.Success).user
+            val uid = user.uid
             jobApplicationViewModel.setUserId(uid)
             userViewModel.setUserId(uid)
 
@@ -52,16 +60,19 @@ fun JobbyAppNavHost(
             userViewModel.saveUserToDatabase( // then save this user to DB
                 User(
                     userId = uid,
-                    firstName = userUiState!!.displayName?.substringBefore(" ") ?: "New",
-                    lastName = userUiState!!.displayName?.substringAfter(" ", "")?.ifBlank { "User" } ?: "User"
+                    firstName = user.displayName?.substringBefore(" ") ?: "New",
+                    lastName = user.displayName?.substringAfter(" ", "")?.ifBlank { "User" } ?: "User"
                 )
             )
-            // if has user logged in/signed in when app launch, skip StartScreen and go to ListScreen directly
-            navController.navigate(JobApplicationListScreenRoute) {
-                //and ensure StartScreen is not in backstack
-                popUpTo(StartScreenRoute) { inclusive = true }
+            
+            // Only navigate if we are on the start screen to avoid duplicate screens
+            if (navController.currentDestination?.route?.contains("StartScreenRoute") == true) {
+                navController.navigate(JobApplicationListScreenRoute) {
+                    //and ensure StartScreen is not in backstack
+                    popUpTo(StartScreenRoute) { inclusive = true }
+                }
             }
-        } else {
+        } else if (authUiState is AuthUiState.Error) {
             // If no Firebase user, try to load the offline user
             jobApplicationViewModel.setUserId(OFFLINE_USER_ID)
             userViewModel.setUserId(OFFLINE_USER_ID)
@@ -82,7 +93,7 @@ fun JobbyAppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = if (userUiState == null) StartScreenRoute else JobApplicationListScreenRoute, //initial launch destination
+        startDestination = if (authUiState is AuthUiState.Success) JobApplicationListScreenRoute else StartScreenRoute, //initial launch destination
         modifier = modifier
     ) {
         composable<StartScreenRoute> {
@@ -102,7 +113,7 @@ fun JobbyAppNavHost(
                         userViewModel.saveUserToDatabase(
                             User(
                                 userId = OFFLINE_USER_ID,
-                                firstName = firstName.ifBlank { "Guest" },
+                                firstName = firstName.ifBlank { "Offline" },
                                 lastName = lastName.ifBlank { "User" }
                             )
                         )
