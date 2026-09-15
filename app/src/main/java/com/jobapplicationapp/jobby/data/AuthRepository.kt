@@ -19,4 +19,7 @@ interface AuthRepository {
 
     // for sign out
     suspend fun signOut()
+
+    //for login with Google account
+    suspend fun signInWithGoogle(idToken : String) : Result <Unit>
 }

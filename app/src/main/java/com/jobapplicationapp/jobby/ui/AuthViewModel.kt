@@ -49,4 +49,14 @@ class AuthViewModel(
             authRepository.signOut()
         }
     }
+
+    //handles both sign in and sign up when using google
+    fun signInWithGoogle(idToken: String, onResult: (Result<Unit>) -> Unit){
+        viewModelScope.launch {
+            val result = authRepository.signInWithGoogle(idToken)
+            onResult(result)
+        }
+    }
+
+
 }
