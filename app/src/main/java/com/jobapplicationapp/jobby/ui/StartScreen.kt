@@ -1,5 +1,8 @@
 package com.jobapplicationapp.jobby.ui
 
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import android.util.Log.e
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,10 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,9 +39,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CustomCredential
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun StartScreen(
@@ -203,7 +212,7 @@ fun StartScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Social Login
-            LoginGoogleAccountField(onClick = onLoginSuccess)
+            LoginGoogleAccountField(authViewModel = authViewModel,onLoginSuccess = onLoginSuccess)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -224,9 +233,50 @@ fun SkipLogin(onClick: () -> Unit) {
 }
 
 @Composable
-fun LoginGoogleAccountField(onClick: () -> Unit) {
+fun LoginGoogleAccountField(
+    authViewModel: AuthViewModel,
+    onLoginSuccess: () -> Unit) {
+    //to handle SignInWithGoogle
+    val scope = rememberCoroutineScope() //for coroutine scope, asynchronous nature of sign in task
+    val context = LocalContext.current //for credential manager to show pop up
+    val googleWebClientId = stringResource(R.string.google_web_client_id)
+
     OutlinedButton(
-        onClick = onClick,
+        onClick = {
+            scope.launch {
+                try {
+                    val credentialManager = CredentialManager.create(context)
+
+                    //create the google option(using web client id)
+                    val googleIdOption = GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setServerClientId(googleWebClientId)
+                        .build()
+
+                    //create the credential request
+                    val request = GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                    //show the pop up
+                    val result = credentialManager.getCredential(context, request)
+
+                    //extract the token
+                    val credential = result.credential
+                    if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                        val googleIdTokenCredential =
+                            GoogleIdTokenCredential.createFrom(credential.data)
+                        val idToken = googleIdTokenCredential.idToken
+
+                        //tell the viewModel to sign in
+                        authViewModel.signInWithGoogle(idToken) { loginResult ->
+                            if (loginResult.isSuccess) onLoginSuccess()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+            }
+        },
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium
     ) {

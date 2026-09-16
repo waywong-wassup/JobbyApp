@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -9,9 +10,11 @@ plugins {
     alias(libs.plugins.googleServices)
 }
 
+
 android {
     namespace = "com.jobapplicationapp.jobby"
     compileSdk = 37
+
 
     defaultConfig {
         applicationId = "com.jobapplicationapp.jobby"
@@ -21,6 +24,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+        val clientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: ""
+        resValue("string", "google_web_client_id", clientId)
     }
 
     buildTypes {
