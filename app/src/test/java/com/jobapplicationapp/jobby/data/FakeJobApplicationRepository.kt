@@ -10,13 +10,13 @@ class FakeJobApplicationRepository : JobApplicationRepository {
 
     private val jobApplicationsFlow = MutableStateFlow<List<JobApplication>>(emptyList())
     var shouldThrowError = false
-    override fun getAllJobApplications(): Flow<List<JobApplication>> = flow {
+
+    override fun getAllJobApplications(userId: String): Flow<List<JobApplication>> = flow {
         if (shouldThrowError) {
             throw Exception("Fake error")
         }
-        //ensure error is being thrown into the flow.
-        jobApplicationsFlow.collect {
-            emit(it)
+        jobApplicationsFlow.collect { list ->
+            emit(list.filter { it.userId == userId })
         }
     }
 
@@ -25,22 +25,13 @@ class FakeJobApplicationRepository : JobApplicationRepository {
         //why use update here? to create a brand new list to signal to UI that there is changes.
         //list.add wouldn't work because it doesn't tell ui changes has changed. so update is used.
         jobApplicationsFlow.update { jobList ->
-            val newId = jobList.size + 1
-            // assign new id
-            val jobWithNewId = jobApplication.copy(jobApplicationId = newId)
-
-            jobList + jobWithNewId
+            jobList.filterNot { it.jobApplicationId == jobApplication.jobApplicationId} + jobApplication
         }
     }
 
     override suspend fun updateJobApplication(jobApplication: JobApplication) {
         // take current list and update the item with the same id
-        jobApplicationsFlow.update { list ->
-            //list.map - go through each jobapplicationid and check if the id matches, if id match, then new jobApplication is replacing it. if not, then keeping the instance as is.
-            list.map {
-                if (it.jobApplicationId == jobApplication.jobApplicationId) jobApplication else it
-            }
-        }
+        addJobApplication(jobApplication)
     }
 
 
@@ -50,11 +41,10 @@ class FakeJobApplicationRepository : JobApplicationRepository {
 
     }
 
-    override fun getJobApplicationById(id: Int): Flow<JobApplication?> {
+    override fun getJobApplicationById(id: String): Flow<JobApplication?> {
         //go through all items in the list and check id matches, return the one that matches
         return jobApplicationsFlow.map { list ->
             list.find { it.jobApplicationId == id }
         }
     }
-
 }

@@ -27,7 +27,7 @@ class JobbyAppNavHostTest {
     lateinit var navController: TestNavHostController
 
     private val testJob = JobApplication(
-        jobApplicationId = 1,
+        jobApplicationId = "1",
         jobTitle = "Software Engineer",
         companyName = "Test Company",
         location = "Remote",
@@ -38,15 +38,16 @@ class JobbyAppNavHostTest {
         jobType = null,
         applicationPostedDate = null,
         notes = null,
-        salary = null
+        salary = null,
+        userId = "1"
     )
 
     // Fake Repositories to avoid real database usage
     class FakeJobRepository(initialJobs: List<JobApplication> = emptyList()) : JobApplicationRepository {
         private val _jobs = MutableStateFlow(initialJobs)
-        override fun getAllJobApplications() = _jobs.asStateFlow()
+        override fun getAllJobApplications(userId: String) = _jobs.asStateFlow()
         override suspend fun addJobApplication(job: JobApplication) {
-            _jobs.update { it + job.copy(jobApplicationId = it.size + 1) }
+            _jobs.update { it + job }
         }
         override suspend fun updateJobApplication(job: JobApplication) {
             _jobs.update { list -> list.map { if (it.jobApplicationId == job.jobApplicationId) job else it } }
@@ -54,13 +55,13 @@ class JobbyAppNavHostTest {
         override suspend fun deleteJobApplication(job: JobApplication) {
             _jobs.update { list -> list.filter { it.jobApplicationId != job.jobApplicationId } }
         }
-        override fun getJobApplicationById(id: Int) = flowOf(_jobs.value.find { it.jobApplicationId == id })
+        override fun getJobApplicationById(id: String) = flowOf(_jobs.value.find { it.jobApplicationId == id })
     }
 
     class FakeUserRepository : UserRepository {
         override suspend fun deleteUser(user: User) {}
         override suspend fun addUser(user: User) {}
-        override fun getCurrentUser(userId: Int) = flowOf(User.sampleUser)
+        override fun getCurrentUser(userId: String) = flowOf(User.sampleUser)
     }
 
     private fun setupNavHost(
@@ -68,7 +69,9 @@ class JobbyAppNavHostTest {
         userRepository: UserRepository = FakeUserRepository()
     ) {
         val jobViewModel = JobApplicationViewModel(jobRepository)
-        val userViewModel = UserViewModel(userRepository, 1)
+        jobViewModel.setUserId("1")
+        val userViewModel = UserViewModel(userRepository)
+        userViewModel.setUserId("1")
 
         composeTestRule.setContent {
             navController = TestNavHostController(LocalContext.current)

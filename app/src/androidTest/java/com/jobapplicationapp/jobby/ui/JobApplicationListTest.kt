@@ -15,7 +15,7 @@ import org.junit.Test
 class JobApplicationListTest {
 
     val testJob1 = JobApplication(
-        jobApplicationId = 1,
+        jobApplicationId = "1",
         jobTitle = "Android Developer",
         companyName = "Tech Corp",
         location = "Auckland",
@@ -26,11 +26,12 @@ class JobApplicationListTest {
         contactDetails = null,
         jobType = null,
         applicationPostedDate = null,
-        notes = null
+        notes = null,
+        userId = "1"
     )
 
     val testJob2 = JobApplication(
-    jobApplicationId = 2,
+    jobApplicationId = "2",
     jobTitle = "iOS Developer",
     companyName = "App Studio",
     location = "Remote",
@@ -41,7 +42,8 @@ class JobApplicationListTest {
     contactDetails = null,
     jobType = null,
     applicationPostedDate = null,
-    notes = null
+    notes = null,
+    userId = "1"
     )
 
     @get:Rule
@@ -80,7 +82,7 @@ class JobApplicationListTest {
 
     @Test
     fun jobApplicationList_onClickOfEdit_triggerOnEditClick() {
-        var capturedId = -1
+        var capturedId = "-1"
         val testJobs = listOf(testJob1)
         composeTestRule.setContent {
             AppTheme() {
@@ -92,7 +94,7 @@ class JobApplicationListTest {
         }
 
         composeTestRule.onNodeWithText("Android Developer").performClick()
-        assert(capturedId == 1)
+        assert(capturedId == "1")
     }
 
     @Test

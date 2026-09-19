@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -6,11 +7,14 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.googleServices)
 }
+
 
 android {
     namespace = "com.jobapplicationapp.jobby"
     compileSdk = 37
+
 
     defaultConfig {
         applicationId = "com.jobapplicationapp.jobby"
@@ -20,6 +24,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+        val clientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: ""
+        resValue("string", "google_web_client_id", clientId)
     }
 
     buildTypes {
@@ -54,6 +66,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.2.1")
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
     debugImplementation(libs.androidx.ui.tooling)
 
     // Jetpack Compose integration
@@ -71,6 +84,16 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
     implementation("com.google.errorprone:error_prone_annotations:2.18.0")
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     testImplementation(libs.junit)
     testImplementation("com.google.truth:truth:1.4.5")

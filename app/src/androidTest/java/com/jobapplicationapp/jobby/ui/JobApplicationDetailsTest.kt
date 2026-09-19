@@ -20,7 +20,8 @@ import org.junit.Test
 class JobApplicationDetailsTest {
 
     val testJob1 = JobApplication(
-        jobApplicationId = 1,
+        jobApplicationId = "1",
+        userId = "1",
         jobTitle = "Android Developer",
         companyName = "Tech Corp",
         location = "Auckland",
@@ -35,7 +36,8 @@ class JobApplicationDetailsTest {
     )
 
     val testJob2 = JobApplication(
-        jobApplicationId = 2,
+        jobApplicationId = "2",
+        userId = "1",
         jobTitle = "iOS Developer",
         companyName = "App Studio",
         location = "Remote",
@@ -49,8 +51,8 @@ class JobApplicationDetailsTest {
         notes = null
     )
 
-    private fun createJobViewModel() = JobApplicationViewModel(DummyJobRepository())
-    private fun createUserViewModel() = UserViewModel(DummyUserRepository(), 1)
+    private fun createJobViewModel() = JobApplicationViewModel(DummyJobRepository()).apply { setUserId("1") }
+    private fun createUserViewModel() = UserViewModel(DummyUserRepository()).apply { setUserId("1") }
 
 
 

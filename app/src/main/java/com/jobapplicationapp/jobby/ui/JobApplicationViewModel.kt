@@ -5,16 +5,28 @@ import com.jobapplicationapp.jobby.data.JobApplicationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
 import com.jobapplicationapp.jobby.data.JobApplication
+import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.UserRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 
 class JobApplicationViewModel (
     private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
-    val uiState: StateFlow<JobApplicationUiState> = jobApplicationRepository.getAllJobApplications()
-        .map<List<JobApplication>, JobApplicationUiState> { JobApplicationUiState.Success(it) }
-        .catch { emit(JobApplicationUiState.Error) }
+    private val _userId = MutableStateFlow<String?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<JobApplicationUiState> = _userId
+        .filterNotNull()
+        .flatMapLatest { userId -> jobApplicationRepository.getAllJobApplications(userId)}
+            .map<List<JobApplication>, JobApplicationUiState> {
+                JobApplicationUiState.Success(it)
+            }
+        .catch {
+           emit(JobApplicationUiState.Error)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -69,11 +81,7 @@ class JobApplicationViewModel (
         if (changes != null && validateInput() == ValidationError.NONE) {
             viewModelScope.launch {
                 try {
-                    if (changes.jobApplicationId == 0) {
-                        addJobApplication(changes)
-                    } else {
-                        updateJobApplication(changes)
-                    }
+                    jobApplicationRepository.updateJobApplication(changes)
                 } catch (e: Exception) {
                     println("Error saving job application: ${e.message}")
                 }
@@ -85,10 +93,11 @@ class JobApplicationViewModel (
         _changingJobApplication.value = job
     }
 
-    fun loadJobApplication(id: Int) {
-        // id = 0 if add new job
-        if(id==0){
+    fun loadJobApplication(id: String) {
+        // id = "0" if add new job
+        if(id == "0"){
             _changingJobApplication.value = JobApplication(
+                userId = _userId.value ?: OFFLINE_USER_ID,
                 jobTitle = "",
                 companyName = "",
                 progress = "Applied",
@@ -127,6 +136,10 @@ class JobApplicationViewModel (
             job.companyName.isBlank() -> ValidationError.COMPANY_NAME_REQUIRED
             else -> ValidationError.NONE
         }
+    }
+
+    fun setUserId(id: String) {
+        _userId.value = id
     }
 
  }

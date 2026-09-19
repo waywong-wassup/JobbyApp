@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.JobApplication
+import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.User
 import com.jobapplicationapp.jobby.ui.components.EditUserDetailsBottomSheet
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
@@ -67,16 +69,17 @@ fun JobApplicationListScreen(
     jobApplicationViewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory),
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
     modifier: Modifier = Modifier,
-    onEditClick: (Int) -> Unit = {},
+    onEditClick: (String) -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
     val jobUiState by jobApplicationViewModel.uiState.collectAsState()
     val userUiState by userViewModel.userUiState.collectAsState()
     var showUserDetailsEditSheet by remember { mutableStateOf(false) }
+    val isSyncEnabled by userViewModel.isSyncEnabledState.collectAsState()
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            val user = (userUiState as? UserUiState.Success)?.user ?: User.sampleUser
+            val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
             JobbyTopBar(user = user, onEditUserDetailsClick = {
                 userViewModel.startEditingUser(user)
                 showUserDetailsEditSheet = true })
@@ -105,7 +108,7 @@ fun JobApplicationListScreen(
                     modifier = Modifier.padding(innerPadding)
                 )
                 if (showUserDetailsEditSheet) {
-                    val user = (userUiState as? UserUiState.Success)?.user ?: User.sampleUser
+                    val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
                     EditUserDetailsBottomSheet(
                         onDismiss = { showUserDetailsEditSheet = false },
                         onSave = { firstName, lastName ->
@@ -114,7 +117,12 @@ fun JobApplicationListScreen(
                             showUserDetailsEditSheet = false
                         },
                         defaultFirstname = user.firstName,
-                        defaultLastName = user.lastName
+                        defaultLastName = user.lastName,
+                        initialSyncEnabled = isSyncEnabled,
+                        onSyncToggle = { enabled ->
+                            userViewModel.setSyncEnabled(enabled)
+                        },
+                        syncToggleEnabled = user.userId != OFFLINE_USER_ID
                     )
                 }
             }
@@ -147,13 +155,24 @@ fun JobbyAppUserName(
     TextButton(
         onClick = {onEditUserDetailsClick()}
     ){
-        Text(
-            text = "${user.firstName} ${user.lastName}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimary,
-            modifier = modifier
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "${user.firstName} ${user.lastName}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = modifier
+            )
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 
@@ -188,7 +207,7 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
 @Composable
 fun JobApplicationList(
     jobApplications: List<JobApplication>,
-    onEditClick: (Int) -> Unit,
+    onEditClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ){
     LazyColumn(
@@ -362,7 +381,13 @@ private fun JobbyTopBarPreview() {
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember { JobApplicationViewModel(DummyJobRepository()) }
-    val dummyUserViewModel = remember { UserViewModel(DummyUserRepository(), 1) }
+    val dummyUserViewModel = remember {
+        UserViewModel(
+            userRepository = DummyUserRepository(),
+            jobApplicationRepository = DummyJobRepository(),
+            userPreferencesRepository = DummyUserPreferencesRepository()
+        )
+    }
 
     AppTheme {
         JobApplicationListScreen(

@@ -2,24 +2,43 @@ package com.jobapplicationapp.jobby.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.User
 import com.jobapplicationapp.jobby.data.UserRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.concurrent.ThreadLocalRandom.current
+import com.jobapplicationapp.jobby.data.JobApplicationRepository
+import com.jobapplicationapp.jobby.data.SyncJobApplicationRepository
+import com.jobapplicationapp.jobby.data.UserPreferencesRepository
+
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    userId: Int
+    private val jobApplicationRepository: JobApplicationRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
-   val userUiState : StateFlow<UserUiState> = userRepository.getCurrentUser(userId)
+    private val _userId = MutableStateFlow<String?>(null)
+    //private val _isSyncEnabled = MutableStateFlow(false)
+    val isSyncEnabledState: StateFlow<Boolean> = userPreferencesRepository.isSyncEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+   @OptIn(ExperimentalCoroutinesApi::class)
+   val userUiState : StateFlow<UserUiState> = _userId
+       .filterNotNull()
+       .flatMapLatest { id -> userRepository.getCurrentUser(id) }
        .map {user ->
            if(user != null) UserUiState.Success(user) else UserUiState.Error
        }
@@ -29,6 +48,13 @@ class UserViewModel(
            started = SharingStarted.WhileSubscribed(5_000),
            initialValue = UserUiState.Loading,
        )
+
+    fun setUserId(id: String) {
+        _userId.value = id
+        if (id == OFFLINE_USER_ID) {
+            setSyncEnabled(false)
+        }
+    }
 
     //for reflecting change on ui
     private val _changingUserDetails = MutableStateFlow<User?> (null)
@@ -40,7 +66,7 @@ class UserViewModel(
 
     fun updateUserDraft(firstName: String, lastName: String) {
         _changingUserDetails.update { currentUser ->
-            (currentUser ?: User(userId = 1, firstName = "", lastName = ""))
+            (currentUser ?: User(userId =_userId.value ?: "", firstName = "", lastName = ""))
                 .copy(firstName = firstName, lastName = lastName)
         }
     }
@@ -56,15 +82,19 @@ class UserViewModel(
                 }
             }
         }
-
     }
 
-    fun saveUserToDatabase(user: User) {
-        viewModelScope.launch {
+    suspend fun saveUserToDatabase(user: User) {
             userRepository.addUser(user)
+    }
+
+//    fun toggleSync(enabled: Boolean)
+//        _isSyncEnabled.value = !_isSyncEnabled.value
+//    }
+
+    fun setSyncEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setIsSyncEnabled(enabled)
         }
     }
-
-
-
 }

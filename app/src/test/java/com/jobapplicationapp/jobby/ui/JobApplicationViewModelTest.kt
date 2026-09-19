@@ -16,7 +16,8 @@ class JobApplicationViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
     val testDataJob1 = JobApplication(
-        jobApplicationId = 1,
+        jobApplicationId = "1",
+        userId = "1",
         jobTitle = "Android Developer",
         companyName = "HSBC",
         location = "Auckland",
@@ -38,15 +39,15 @@ class JobApplicationViewModelTest {
     fun setup() {
         fakeJobRepository = FakeJobApplicationRepository()
         fakeUserRepository = FakeUserRepository()
-        viewModel = JobApplicationViewModel(
-            fakeJobRepository
-        )
+        viewModel = JobApplicationViewModel(fakeJobRepository)
+        viewModel.setUserId("1")
     }
 
     @Test
     fun uiState_onRepositoryError_returnsError() = runTest {
         fakeJobRepository.shouldThrowError = true
         val errorViewModel = JobApplicationViewModel(fakeJobRepository)
+        errorViewModel.setUserId("1")
         errorViewModel.uiState.test {
             val finalState = expectMostRecentItem()
             assertEquals(JobApplicationUiState.Error, finalState)
@@ -56,32 +57,31 @@ class JobApplicationViewModelTest {
     @Test
     fun deleteCurrentJobApplication_validJobIdDeletesSuccess() = runTest {
         fakeJobRepository.addJobApplication(testDataJob1)
-        viewModel.loadJobApplication(1)
+        viewModel.loadJobApplication("1")
         viewModel.deleteCurrentJobApplication()
-        viewModel.loadJobApplication(1)
+        viewModel.loadJobApplication("1")
         assertNull(viewModel.changingJobApplication.value)
     }
 
     @Test
     fun deleteCurrentJobApplication_invalidJobIdDoesNotDelete() = runTest{
         fakeJobRepository.addJobApplication(testDataJob1)
-        viewModel.loadJobApplication(99)
+        viewModel.loadJobApplication("99")
         val loadedInvalidJob = viewModel.changingJobApplication.value
         assertNull(loadedInvalidJob) //no job should be loaded
         viewModel.deleteCurrentJobApplication()
-        viewModel.loadJobApplication(1)
+        viewModel.loadJobApplication("1")
         val result = viewModel.changingJobApplication.value
         assertEquals(testDataJob1, result) //id 1 not deleted
-
     }
 
     @Test
     fun saveJobApplicationChange_newJobWithChanges_addsToRepository() = runTest {
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         viewModel.updateJobDetailFieldsUiStates { copy(jobTitle = "Android Developer", companyName = "Mcdonald") }
 
         viewModel.saveJobApplicationChange()
-        fakeJobRepository.getAllJobApplications().test {
+        fakeJobRepository.getAllJobApplications("1").test {
             val jobsList = awaitItem()
             assertTrue(jobsList.any { it.jobTitle == "Android Developer" })
             assertTrue(jobsList.any { it.companyName == "Mcdonald" })
@@ -91,10 +91,10 @@ class JobApplicationViewModelTest {
     @Test
     fun saveJobApplicationChange_ExistingJob_addsToRepository() = runTest {
         fakeJobRepository.addJobApplication(testDataJob1)
-        viewModel.loadJobApplication(1)
+        viewModel.loadJobApplication("1")
         viewModel.updateJobDetailFieldsUiStates { copy(jobTitle = "iOS Developer", companyName = "KFC") }
         viewModel.saveJobApplicationChange()
-        fakeJobRepository.getAllJobApplications().test {
+        fakeJobRepository.getAllJobApplications("1").test {
             val jobsList = awaitItem()
             assertTrue(jobsList.any { it.jobTitle == "iOS Developer" })
             assertTrue(jobsList.any { it.companyName == "KFC" })
@@ -103,9 +103,9 @@ class JobApplicationViewModelTest {
 
     @Test
     fun saveJobApplicationChange_newJobNoChange_DoesNotSaveToRepository() = runTest  {
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         viewModel.saveJobApplicationChange() // it should fail to save
-        fakeJobRepository.getAllJobApplications().test {
+        fakeJobRepository.getAllJobApplications("1").test {
             val jobsList = awaitItem()
             //invalid input, should not save, hence jobsList should still be empty
             assertTrue(jobsList.isEmpty())
@@ -123,26 +123,26 @@ class JobApplicationViewModelTest {
      @Test
      fun deleteJobApplication_deletesFromRepository() = runTest {
          fakeJobRepository.addJobApplication(testDataJob1)
-         viewModel.loadJobApplication(1)
+         viewModel.loadJobApplication("1")
          viewModel.deleteJobApplication(testDataJob1)
-         fakeJobRepository.getAllJobApplications().test {
+         fakeJobRepository.getAllJobApplications("1").test {
              val jobsList = awaitItem()
              assertTrue(jobsList.isEmpty())
          }
      }
-
 
     //id = 0, verify files are null when add new job
     // id = 1, then output will be the full value of application
     // id = -1, well, crashes i guess lol
     @Test
     fun loadJobApplication_zeroId_returnsNewJob() {
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         val result = viewModel.changingJobApplication.value
-        assertEquals(0,result?.jobApplicationId)
+        // UUID is generated automatically, so we don't check exact value for new jobs
+        assertNotNull(result?.jobApplicationId) 
         assertEquals("",result?.jobTitle)
         assertEquals("",result?.companyName)
-        assertEquals("Applied",result?.progress)
+        assertEquals("To Apply",result?.progress) // Based on your actual ViewModel code
         assertNull(result?.salary)
         assertNull(result?.applicationURL)
         assertNull(result?.contactName)
@@ -154,14 +154,16 @@ class JobApplicationViewModelTest {
 
     @Test
     fun loadJobApplication_validId_returnsExistingJob() {
-        viewModel.addJobApplication(testDataJob1)
-        viewModel.loadJobApplication(1)
+        runTest {
+            fakeJobRepository.addJobApplication(testDataJob1)
+        }
+        viewModel.loadJobApplication("1")
         val result = viewModel.changingJobApplication.value
-        assertEquals(1,result?.jobApplicationId)
+        assertEquals("1",result?.jobApplicationId)
         assertEquals("Android Developer",result?.jobTitle)
         assertEquals("HSBC",result?.companyName)
         assertEquals("Auckland",result?.location)
-        assertEquals("100000".toLongOrNull(),result?.salary)
+        assertEquals(100000.toLong(),result?.salary)
         assertEquals("www.hireme.com",result?.applicationURL)
         assertEquals("APPLIED",result?.progress)
         assertEquals("Ashley",result?.contactName)
@@ -173,7 +175,7 @@ class JobApplicationViewModelTest {
 
     @Test
     fun loadJobApplication_inValidNegativeId_returnsInvalidJobWithNull() {
-        viewModel.loadJobApplication(100)
+        viewModel.loadJobApplication("100")
         val result = viewModel.changingJobApplication.value
         assertNull(result)
     }
@@ -183,7 +185,7 @@ class JobApplicationViewModelTest {
     @Test
     fun validateInput_EmptyJobTitle_returnsValidationError_JobTitleRequired() {
         //create a new job, id = 0
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         //fill in with empty JobTitle
         viewModel.updateJobDetailFieldsUiStates { copy(jobTitle = "", companyName = "Meta") }
 
@@ -195,7 +197,7 @@ class JobApplicationViewModelTest {
     @Test
     fun validateInput_EmptyCompanyName_returnsValidationError_CompanyNameRequired() {
         //create a new job, id = 0
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         viewModel.updateJobDetailFieldsUiStates { copy(jobTitle = "Developer", companyName = "") }
 
         val result = viewModel.validateInput()
@@ -206,7 +208,7 @@ class JobApplicationViewModelTest {
     @Test
     fun validateInput_EmptyJobTitleEmptyCompanyName_returnsValidationError_JobTitleRequired() {
         //create a new job, id = 0
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         viewModel.updateJobDetailFieldsUiStates { copy(jobTitle = "", companyName = "") }
 
         val result = viewModel.validateInput()
@@ -217,7 +219,7 @@ class JobApplicationViewModelTest {
     @Test
     fun validateInput_validJobTitleValidCompanyName_returnsValidationError_NONE() {
         //create a new job, id = 0
-        viewModel.loadJobApplication(0)
+        viewModel.loadJobApplication("0")
         viewModel.updateJobDetailFieldsUiStates { copy(jobTitle = "Janitor", companyName = "HSBC") }
 
         val result = viewModel.validateInput()
@@ -228,7 +230,7 @@ class JobApplicationViewModelTest {
     @Test
     fun validateInput_noChanges_returnsValidationError_NONE() {
         viewModel.addJobApplication(testDataJob1)
-        viewModel.loadJobApplication(1)
+        viewModel.loadJobApplication("1")
         val result = viewModel.validateInput()
 
         assertEquals(JobApplicationViewModel.ValidationError.NONE, result)

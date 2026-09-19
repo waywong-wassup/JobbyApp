@@ -3,13 +3,14 @@ package com.jobapplicationapp.jobby.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface JobApplicationDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addJobApplication(jobApplication: JobApplication)
 
     @Update
@@ -18,9 +19,12 @@ interface JobApplicationDao {
     @Delete
     suspend fun deleteJobApplication(jobApplication: JobApplication)
 
-    @Query("SELECT * from JobApplication ORDER BY jobApplicationId ASC")
-    fun getAllJobApplications(): Flow<List<JobApplication>>
+    @Query("SELECT * from JobApplication WHERE userId = :userId ORDER BY jobApplicationId ASC")
+    fun getAllJobApplications(userId: String): Flow<List<JobApplication>>
 
     @Query("SELECT * from JobApplication WHERE jobApplicationId = :id")
-    fun getJobApplicationById(id: Int): Flow<JobApplication?>
+    fun getJobApplicationById(id: String): Flow<JobApplication?>
+
+    @Query("SELECT * FROM JobApplication WHERE userId = :userId AND isSynced = 0")
+    fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>>
 }
