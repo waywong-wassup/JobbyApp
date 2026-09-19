@@ -14,5 +14,5 @@ interface JobApplicationRepository {
     suspend fun updateJobApplication(jobApplication: JobApplication)
     suspend fun deleteJobApplication(jobApplication: JobApplication)
     fun getJobApplicationById(id: String): Flow<JobApplication?>
-
+    fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>>
 }

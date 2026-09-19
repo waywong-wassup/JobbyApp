@@ -24,4 +24,7 @@ interface JobApplicationDao {
 
     @Query("SELECT * from JobApplication WHERE jobApplicationId = :id")
     fun getJobApplicationById(id: String): Flow<JobApplication?>
+
+    @Query("SELECT * FROM JobApplication WHERE userId = :userId AND isSynced = 0")
+    fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>>
 }

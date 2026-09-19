@@ -434,11 +434,17 @@ class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationReposi
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
     override fun getJobApplicationById(id: String) = kotlinx.coroutines.flow.flowOf(null)
+    override fun getUnsyncedJobApplications(userId: String) = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
 }
 class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
     override fun getCurrentUser(userId: String) = kotlinx.coroutines.flow.flowOf(null)
+}
+
+class DummyUserPreferencesRepository : com.jobapplicationapp.jobby.data.UserPreferencesRepository {
+    override val isSyncEnabled: kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false)
+    override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
 }
 
 @Preview (showBackground = true)
@@ -450,7 +456,11 @@ fun JobApplicationDetailsScreenPreview() {
         }
     }
     val dummyUserViewModel = remember {
-        UserViewModel(DummyUserRepository(),DummyJobRepository())
+        UserViewModel(
+            userRepository = DummyUserRepository(),
+            jobApplicationRepository = DummyJobRepository(),
+            userPreferencesRepository = DummyUserPreferencesRepository()
+        )
     }
 
     AppTheme{

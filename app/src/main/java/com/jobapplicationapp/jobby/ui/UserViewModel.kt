@@ -19,16 +19,22 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.jobapplicationapp.jobby.data.JobApplicationRepository
 import com.jobapplicationapp.jobby.data.SyncJobApplicationRepository
+import com.jobapplicationapp.jobby.data.UserPreferencesRepository
 
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    private val jobApplicationRepository: JobApplicationRepository
+    private val jobApplicationRepository: JobApplicationRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
     private val _userId = MutableStateFlow<String?>(null)
-    private val _isSyncEnabled = MutableStateFlow(false)
-    val isSyncEnabledState = _isSyncEnabled.asStateFlow()
-
+    //private val _isSyncEnabled = MutableStateFlow(false)
+    val isSyncEnabledState: StateFlow<Boolean> = userPreferencesRepository.isSyncEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
    @OptIn(ExperimentalCoroutinesApi::class)
    val userUiState : StateFlow<UserUiState> = _userId
        .filterNotNull()
@@ -87,14 +93,8 @@ class UserViewModel(
 //    }
 
     fun setSyncEnabled(enabled: Boolean) {
-        _isSyncEnabled.value = enabled
-
-        // Push the setting to the repository
-        // We cast it because JobApplicationRepository is an interface and is in constructor of this VM,
-        // but SyncJobApplicationRepository is the one with the flag.
-        // if we're directly using SyncJobApplicationRepository, then we will need to implement isSyncEnabled for viewModel,
-        // which make this viewModel not usable for Offline only mode
-        // how to avoid "as?" cast in the future: create a UserPreference class/repository for handling this toggle.
-        (jobApplicationRepository as? SyncJobApplicationRepository)?.isSyncEnabled = enabled
+        viewModelScope.launch {
+            userPreferencesRepository.setIsSyncEnabled(enabled)
+        }
     }
 }

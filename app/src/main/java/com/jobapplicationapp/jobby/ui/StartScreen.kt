@@ -274,6 +274,7 @@ fun LoginGoogleAccountField(
                         }
                     }
                 } catch (e: Exception) {
+                    print("Error: ${e.message}")
                 }
             }
         },

@@ -381,7 +381,13 @@ private fun JobbyTopBarPreview() {
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember { JobApplicationViewModel(DummyJobRepository()) }
-    val dummyUserViewModel = remember { UserViewModel(DummyUserRepository(),DummyJobRepository()) }
+    val dummyUserViewModel = remember {
+        UserViewModel(
+            userRepository = DummyUserRepository(),
+            jobApplicationRepository = DummyJobRepository(),
+            userPreferencesRepository = DummyUserPreferencesRepository()
+        )
+    }
 
     AppTheme {
         JobApplicationListScreen(

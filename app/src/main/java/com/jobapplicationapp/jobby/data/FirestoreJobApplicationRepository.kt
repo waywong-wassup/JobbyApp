@@ -6,6 +6,7 @@ import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
 class FirestoreJobApplicationRepository(
@@ -19,8 +20,11 @@ class FirestoreJobApplicationRepository(
 
     override fun getAllJobApplications(userId: String): Flow<List<JobApplication>> = callbackFlow {
         val subscription = userJobsCollection(userId).addSnapshotListener { snapshot, _ ->
-            val jobs = snapshot?.toObjects<JobApplication>() ?: emptyList()
-            trySend(jobs)
+            //only send the list if it is not from cache.
+            if (snapshot != null && !snapshot.metadata.isFromCache) {
+                val jobs = snapshot.toObjects<JobApplication>() ?: emptyList()
+                trySend(jobs)
+            }
         }
         awaitClose { subscription.remove() }
     }
@@ -44,5 +48,10 @@ class FirestoreJobApplicationRepository(
             trySend(job)
         }
         awaitClose { subscription.remove() }
+    }
+
+    //no additional login for FireStore because we only want to query offline entries, so just return an empty flow
+    override fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>> {
+        return flowOf(emptyList())
     }
 }

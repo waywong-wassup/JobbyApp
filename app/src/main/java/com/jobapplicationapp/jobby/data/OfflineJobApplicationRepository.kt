@@ -23,6 +23,8 @@ class OfflineJobApplicationRepository(private val dao: JobApplicationDao) : JobA
     override fun getJobApplicationById(id: String): Flow<JobApplication?> {
         return dao.getJobApplicationById(id)
     }
-
+    override fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>> {
+        return dao.getUnsyncedJobApplications(userId)
+    }
 
 }
