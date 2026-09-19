@@ -22,6 +22,13 @@
     *   Contact Information & Custom Notes
 *   **Modern UI:** A clean, reactive interface built entirely with **Jetpack Compose** and **Material 3**.
 
+## 📸 Screenshots
+
+| Start Screen | List Screen | Details Screen |
+| :---: | :---: | :---: |
+|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/ab4ffd25-b60c-40c5-bbba-e0dbf82ca841" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/972ee9c5-4e36-4aed-9d64-f16404077d3c" />|
+
+
 ## 🛠 Tech Stack
 
 *   **Language:** [Kotlin](https://kotlinlang.org/)
@@ -69,9 +76,5 @@ graph TD
 4.  **Build & Run:**
     *   Sync Gradle and run the app on your emulator or physical device.
 
-## 📸 Screenshots
 
-| Start Screen | List Screen | Details Screen |
-| :---: | :---: | :---: |
-| *[Add Image]* | *[Add Image]* | *[Add Image]* |
 
