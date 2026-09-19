@@ -9,10 +9,12 @@
 ## 🚀 Features
 
 *   **Offline-First Architecture:** Your data is always accessible. View and edit your job applications even without an internet connection.
-*   **Firebase Integration:** 
-    *   **Authentication:** Secure login and sign-up using Firebase Email/Password.
-    *   **Cloud Sync:** Optional real-time synchronisation between your local database (Room) and the cloud (Firestore).
-*   **Offline Mode:** Start tracking jobs immediately without an account; your data will be saved locally.
+*   **Authentication Options:** 
+    *   **Google Sign-In:** Modern, one-tap sign-in using the **Android Credential Manager API**.
+    *   **Email/Password:** Traditional secure login and sign-up via Firebase Auth.
+*   **Smart Cloud Sync:** Intelligent two-way synchronization that automatically pushes unsynced data upon login or app launch.
+*   **Persistent Preferences:** Remembers your settings (like Sync status) even after app restarts using **Jetpack DataStore**.
+*   **Guest Mode:** Start tracking jobs immediately without an account; your data is saved locally and can be synced later.
 *   **Comprehensive Tracking:** Manage detailed job information including:
     *   Job Title & Company
     *   Application Status (To Apply, Applied, Interview, Offered, etc.)
@@ -25,7 +27,8 @@
 *   **Language:** [Kotlin](https://kotlinlang.org/)
 *   **UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) (Material 3)
 *   **Database (Local):** [Room](https://developer.android.com/training/data-storage/room)
-
+*   **Persistence:** [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) (Preferences)
+*   **Identity:** [Credential Manager API](https://developer.android.com/training/sign-in/credential-manager)
 *   **Backend:** [Firebase](https://firebase.google.com/) (Auth, Firestore, Analytics)
 *   **Architecture:** MVVM + Repository Pattern + Offline-First Sync Logic
 *   **Navigation:** Jetpack Navigation Compose (Type-safe routes)
@@ -57,7 +60,18 @@ graph TD
 2.  **Add Firebase:**
     *   Create an Android app in your Firebase Console.
     *   Download the `google-services.json` and place it in the `app/` directory.
-    *   Enable **Email/Password** and **Anonymous** Authentication in the Firebase Console.
+    *   Enable **Email/Password**, **Google**, and **Anonymous** Authentication in the Firebase Console.
     *   Enable **Cloud Firestore**.
-3.  **Build & Run:**
+3.  **Add Configuration:**
+    *   Open `local.properties` in the project root.
+    *   Add your Firebase Web Client ID: 
+        `GOOGLE_WEB_CLIENT_ID=your_web_client_id_here.apps.googleusercontent.com`
+4.  **Build & Run:**
     *   Sync Gradle and run the app on your emulator or physical device.
+
+## 📸 Screenshots
+
+| Start Screen | List Screen | Details Screen |
+| :---: | :---: | :---: |
+| *[Add Image]* | *[Add Image]* | *[Add Image]* |
+
