@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
@@ -45,8 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
@@ -58,6 +61,15 @@ import com.jobapplicationapp.jobby.data.User
 import com.jobapplicationapp.jobby.ui.components.DeleteConfirmationDialog
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 import kotlinx.coroutines.flow.asStateFlow
+import java.text.SimpleDateFormat
+import androidx.compose.material3.DatePicker
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import java.util.Locale.getDefault
+import androidx.compose.ui.platform.LocalUriHandler
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,25 +89,52 @@ fun JobApplicationDetailsScreen(
     val companyNameFocusRequester = remember { FocusRequester() }
     var jobTitleError by remember { mutableStateOf(false) }
     var companyNameError by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember {mutableStateOf(false)}
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var datePickerTarget by remember { mutableStateOf<String?>(null) }
+    val datePickerState = rememberDatePickerState()
 
     //delete dialog to overlay on top of details screen
     if (showDeleteDialog) {
-        DeleteConfirmationDialog (
+        DeleteConfirmationDialog(
             onConfirmDelete = {
                 showDeleteDialog = false
                 jobApplicationViewModel.deleteCurrentJobApplication()
                 onConfirmDelete()
             },
-            onDismissDelete = { showDeleteDialog = false}
+            onDismissDelete = { showDeleteDialog = false }
         )
     }
 
+    if (datePickerTarget != null) {
+        DatePickerDialog(
+            onDismissRequest = { datePickerTarget = null }, // Clear target on close
+            confirmButton = {
+                TextButton(onClick = {
+                    val selectedDateInMillis = datePickerState.selectedDateMillis
+                    if (selectedDateInMillis != null) {
+                        val dateStr = SimpleDateFormat("ddMMyyyy", getDefault())
+                            .format(java.util.Date(selectedDateInMillis))
+
+                        // The "Switcher" logic:
+                        jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                            when (datePickerTarget) {
+                                "appliedDate" -> copy(appliedDate = dateStr)
+                                "postedDate" -> copy(applicationPostedDate = dateStr)
+                                else -> this
+                            }
+                        }
+                    }
+                    datePickerTarget = null // Close the dialog
+                }) { Text("Confirm") }
+            }
+        ) { DatePicker(state = datePickerState) }
+    }
     Scaffold(
         topBar = {
             JobApplicationDetailsTopBar(
                 onBackClick = onBackClick,
-                onDeleteIconClick = { showDeleteDialog = true
+                onDeleteIconClick = {
+                    showDeleteDialog = true
                 })
         },
         bottomBar = {
@@ -108,10 +147,12 @@ fun JobApplicationDetailsScreen(
                             jobTitleError = true
                             jobTitleFocusRequester.requestFocus()
                         }
+
                         JobApplicationViewModel.ValidationError.COMPANY_NAME_REQUIRED -> {
                             companyNameError = true
                             companyNameFocusRequester.requestFocus()
                         }
+
                         JobApplicationViewModel.ValidationError.NONE -> {
                             jobApplicationViewModel.saveJobApplicationChange()
                             onSaveClick()
@@ -130,6 +171,7 @@ fun JobApplicationDetailsScreen(
             onJobTitleChange = { jobTitleError = it.isEmpty() },
             onCompanyNameChange = { companyNameError = it.isEmpty() },
             jobApplicationViewModel = jobApplicationViewModel,
+            onDatePickerClick = { datePickerTarget = it },
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -165,7 +207,7 @@ fun JobApplicationDetailsTopBar(
             containerColor = MaterialTheme.colorScheme.primary
         ),
         actions = {
-            IconButton(onClick = {onDeleteIconClick()}
+            IconButton(onClick = { onDeleteIconClick() }
             )
             {
                 Icon(
@@ -210,8 +252,6 @@ fun JobApplicationDetailsBottomBar(
 }
 
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsForm(
@@ -222,13 +262,14 @@ fun JobApplicationDetailsForm(
     onJobTitleChange: (String) -> Unit,
     onCompanyNameChange: (String) -> Unit,
     jobApplicationViewModel: JobApplicationViewModel = viewModel(),
+    onDatePickerClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
     val job by jobApplicationViewModel.changingJobApplication.collectAsState()
     val currentJob = job ?: return
     val requiredFieldMessage = "Required"
-
+    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = modifier
@@ -240,41 +281,49 @@ fun JobApplicationDetailsForm(
             OutlinedTextField(
                 value = currentJob.jobTitle,
                 isError = jobTitleError,
-                supportingText = {
-                    if (jobTitleError) {
-                        Text(requiredFieldMessage)
-                    }
-                },
+                supportingText = if (jobTitleError) {
+                    { Text(requiredFieldMessage) } // show the text only when there's an error
+                } else {
+                    null
+                },// to not reserve any space
                 onValueChange = {
                     jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobTitle = it) }
                     onJobTitleChange(it)
                 },
                 label = { Text(stringResource(R.string.job_title)) },
-                modifier = Modifier.fillMaxWidth()
-                                    .focusRequester(jobTitleFocusRequester)
-                                    .testTag("jobTitleError")
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(jobTitleFocusRequester)
+                    .testTag("jobTitleError")
             )
 
             OutlinedTextField(
                 value = currentJob.companyName,
                 isError = companyNameError,
-                supportingText = {
-                    if (companyNameError) {
-                        Text(requiredFieldMessage)
-                    }
+                supportingText = if (companyNameError) {
+                    { Text(requiredFieldMessage) }
+                } else {
+                    null
                 },
                 onValueChange = {
                     jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(companyName = it) }
                     onCompanyNameChange(it)
-                                },
+                },
                 label = { Text(stringResource(R.string.company_name)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .focusRequester(companyNameFocusRequester)
                     .testTag("companyNameError")
             )
             OutlinedTextField(
                 value = currentJob.location ?: "",
-                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(location = it) } },
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                        copy(
+                            location = it
+                        )
+                    }
+                },
                 label = { Text(stringResource(R.string.location)) },
                 leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
@@ -282,18 +331,77 @@ fun JobApplicationDetailsForm(
 
             OutlinedTextField(
                 value = currentJob.applicationURL ?: "",
-                onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(applicationURL = it) } },
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                        copy(
+                            applicationURL = it
+                        )
+                    }
+                },
                 label = { Text(stringResource(R.string.application_url)) },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    IconButton(onClick = {  }) {
+                    IconButton(onClick = {
+                        val url = currentJob.applicationURL
+                        if (!url.isNullOrBlank()) {
+                            val fullUrl =
+                                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                                    "https://$url"
+                                } else {
+                                    url
+                                }
+                            uriHandler.openUri(fullUrl)
+                        }
+                    }) {
                         Icon(
-                            imageVector = Icons.Default.OpenInNew,
-                            contentDescription = "Open link"
+                            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                            contentDescription = "Open Link"
                         )
                     }
+
                 }
             )
+            OutlinedTextField(
+                value = currentJob.appliedDate ?: "",
+                onValueChange = { input ->
+                    val cleanInput = input.filter { it.isDigit() }
+                    if (cleanInput.length <= 8) {
+                        jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                            copy(appliedDate = cleanInput)
+                        }
+                    }
+                },
+                label = { Text(stringResource(R.string.applied_date)) },
+                placeholder = { Text("dd/mm/yyyy") },
+                trailingIcon = {
+                    IconButton(onClick = { onDatePickerClick("appliedDate") }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Open Calendar")
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ), // Show number pad
+                visualTransformation = DateTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                // format to 10000 to 10,000 etc
+                value = currentJob.salary?.let { "%,d".format(it) } ?: "",
+                onValueChange = { input ->
+                    val unformattedSalary = input.replace(",", "")
+                    if (unformattedSalary.isEmpty()) {
+                        jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = null) }
+                    } else {
+                        jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = unformattedSalary.toLong()) }
+                    }
+                },
+                label = { Text(stringResource(R.string.salary)) },
+                modifier = Modifier.fillMaxWidth(),
+                prefix = { Text("$") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
         }
 
 
@@ -305,10 +413,10 @@ fun JobApplicationDetailsForm(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded },
                     modifier = Modifier.weight(1f)
-                ){
+                ) {
                     OutlinedTextField(
                         value = currentJob.progress,
-                        onValueChange = {  },
+                        onValueChange = { },
                         readOnly = true,
                         label = { Text(stringResource(R.string.progress)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -325,67 +433,87 @@ fun JobApplicationDetailsForm(
                             DropdownMenuItem(
                                 text = { Text(progress.progressPhase) },
                                 onClick = {
-                                    jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(progress = progress.progressPhase) }
+                                    jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                                        copy(
+                                            progress = progress.progressPhase
+                                        )
+                                    }
                                     expanded = false
                                 }
                             )
                         }
                     }
                 }
-                OutlinedTextField(
-                    // format to 10000 to 10,000 etc
-                    value = currentJob.salary?.let { "%,d".format(it) } ?: "",
-                    onValueChange = { input ->
-                        val unformattedSalary = input.replace(",","")
-                        if(unformattedSalary.isEmpty()){
-                            jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = null) }
-                        } else {
-                            jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(salary = unformattedSalary.toLong()) }
-                        }
-                    },
-                    label = { Text(stringResource(R.string.salary)) },
-                    modifier = Modifier.weight(1f),
-                    prefix = { Text("$") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+
             }
 
-                OutlinedTextField(
-                    value = currentJob.applicationPostedDate ?: "",
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = null
+            OutlinedTextField(
+                value = currentJob.applicationPostedDate ?: "",
+                onValueChange = { input ->
+                    val cleanInput = input.filter { it.isDigit() }
+                    if (cleanInput.length <= 8) {
+                        jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                            copy(applicationPostedDate = cleanInput)
+                        }
+                    }
+                },
+                label = { Text(stringResource(R.string.posted_date)) },
+                placeholder = { Text("dd/mm/yyyy") },
+                trailingIcon = {
+                    IconButton(onClick = { onDatePickerClick("postedDate") }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Open Calendar")
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                visualTransformation = DateTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = currentJob.jobType ?: "",
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                        copy(
+                            jobType = it
                         )
-                    },
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(applicationPostedDate = it) } },
-                    label = { Text(stringResource(R.string.posted_date), fontSize = 16.sp) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = currentJob.jobType ?: "",
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(jobType = it) } },
-                    label = { Text(stringResource(R.string.job_type)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    }
+                },
+                label = { Text(stringResource(R.string.job_type)) },
+                modifier = Modifier.fillMaxWidth()
+            )
 
         }
 
         FormSection(title = "Contact Information") {
 
-                OutlinedTextField(
-                    value = currentJob.contactName ?: "",
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(contactName = it) } },
-                    label = { Text(stringResource(R.string.contact_name)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
-                )
-                OutlinedTextField(
-                    value = currentJob.contactDetails ?: "",
-                    onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(contactDetails = it) } },
-                    label = { Text(stringResource(R.string.contact_details)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
+            OutlinedTextField(
+                value = currentJob.contactName ?: "",
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                        copy(
+                            contactName = it
+                        )
+                    }
+                },
+                label = { Text(stringResource(R.string.contact_name)) },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
+            )
+            OutlinedTextField(
+                value = currentJob.contactDetails ?: "",
+                onValueChange = {
+                    jobApplicationViewModel.updateJobDetailFieldsUiStates {
+                        copy(
+                            contactDetails = it
+                        )
+                    }
+                },
+                label = { Text(stringResource(R.string.contact_details)) },
+                modifier = Modifier.fillMaxWidth()
+            )
 
         }
 
@@ -417,25 +545,62 @@ fun FormSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 4.dp)
         )
         content() // the composable like text fields in a section
-        Spacer(modifier = Modifier.height(8.dp))
-        //HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+    }
+}
+
+/**
+ * To transform the manually entered date field to 'dd/MM/yyyy'
+ */
+class DateTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        // Take the raw text (e.g., "20092026")
+        val input = text.text
+        var out = ""
+
+        // Add slashes at the right spots
+        for (i in input.indices) {
+            out += input[i]
+            if (i == 1 || i == 3) out += "/"
+        }
+
+        // This part tells Compose how to move the cursor correctly
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 1) return offset
+                if (offset <= 3) return offset + 1
+                if (offset <= 8) return offset + 2
+                return 10
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 2) return offset
+                if (offset <= 5) return offset - 1
+                if (offset <= 10) return offset - 2
+                return 8
+            }
+        }
+
+        return TransformedText(AnnotatedString(out), offsetMapping)
     }
 }
 
 
-
-
 class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
-    override fun getAllJobApplications(userId: String) = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+    override fun getAllJobApplications(userId: String) =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
     override fun getJobApplicationById(id: String) = kotlinx.coroutines.flow.flowOf(null)
-    override fun getUnsyncedJobApplications(userId: String) = kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+    override fun getUnsyncedJobApplications(userId: String) =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
 }
+
 class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
@@ -443,11 +608,13 @@ class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
 }
 
 class DummyUserPreferencesRepository : com.jobapplicationapp.jobby.data.UserPreferencesRepository {
-    override val isSyncEnabled: kotlinx.coroutines.flow.Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false)
+    override val isSyncEnabled: kotlinx.coroutines.flow.Flow<Boolean> =
+        kotlinx.coroutines.flow.flowOf(false)
+
     override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
 }
 
-@Preview (showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun JobApplicationDetailsScreenPreview() {
     val dummyJobApplicationViewModel = remember {
@@ -463,8 +630,11 @@ fun JobApplicationDetailsScreenPreview() {
         )
     }
 
-    AppTheme{
-        JobApplicationDetailsScreen(jobApplicationViewModel = dummyJobApplicationViewModel, userViewModel = dummyUserViewModel)
+    AppTheme {
+        JobApplicationDetailsScreen(
+            jobApplicationViewModel = dummyJobApplicationViewModel,
+            userViewModel = dummyUserViewModel
+        )
     }
 }
 

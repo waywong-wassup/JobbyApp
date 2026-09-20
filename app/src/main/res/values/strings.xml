@@ -16,4 +16,5 @@
     <string name="save">Save</string>
     <string name="back_to_list">Back to Job applications</string>
     <string name="add_job_application">Add Job Application</string>
+    <string name="applied_date">Date Applied</string>
 </resources>

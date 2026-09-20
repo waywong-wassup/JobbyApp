@@ -27,6 +27,7 @@ data class JobApplication(
     val userId: String = "",
     var jobTitle: String = "",
     var companyName: String = "",
+    var appliedDate: String? = null,
     var location: String?= null,
     var salary: Long? = null, // save as cents and convert to decimal points later
     var applicationURL: String? = null,
@@ -41,8 +42,8 @@ data class JobApplication(
 )  {
     companion object {
         val sampleJobApplication = listOf(
-        JobApplication("1","1","Janitor", "Mom's basement","Auckland", 5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired"),
-        JobApplication("2","1","Librarian","Library","",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
+        JobApplication("1","1","Janitor", "Mom's basement","","Auckland", 5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "full time", "today", "hope I get hired"),
+        JobApplication("2","1","Librarian","Library","","",5, "www.hiremeplz.co.nz","Applied","Aunty", "022123456", "part time", "today", "hope I get hired")
         )
     }
 }
@@ -54,5 +55,6 @@ enum class Progress (val progressPhase: String) {
     INTERVIEW("Interview"),
     OFFERED("Offered"),
     REJECTED("Rejected"),
-    ACCEPTED("Accepted")
+    ACCEPTED("Accepted"),
+    GHOSTED("Ghosted")
 }
