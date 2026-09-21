@@ -70,6 +70,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale.getDefault
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.input.KeyboardCapitalization
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -291,6 +292,10 @@ fun JobApplicationDetailsForm(
                     onJobTitleChange(it)
                 },
                 label = { Text(stringResource(R.string.job_title)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(jobTitleFocusRequester)
@@ -310,11 +315,16 @@ fun JobApplicationDetailsForm(
                     onCompanyNameChange(it)
                 },
                 label = { Text(stringResource(R.string.company_name)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(companyNameFocusRequester)
                     .testTag("companyNameError")
             )
+
             OutlinedTextField(
                 value = currentJob.location ?: "",
                 onValueChange = {
@@ -326,6 +336,10 @@ fun JobApplicationDetailsForm(
                 },
                 label = { Text(stringResource(R.string.location)) },
                 leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -339,6 +353,10 @@ fun JobApplicationDetailsForm(
                     }
                 },
                 label = { Text(stringResource(R.string.application_url)) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     IconButton(onClick = {
@@ -399,7 +417,10 @@ fun JobApplicationDetailsForm(
                 label = { Text(stringResource(R.string.salary)) },
                 modifier = Modifier.fillMaxWidth(),
                 prefix = { Text("$") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
             )
 
         }
@@ -499,6 +520,10 @@ fun JobApplicationDetailsForm(
                     }
                 },
                 label = { Text(stringResource(R.string.contact_name)) },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
             )
@@ -512,6 +537,7 @@ fun JobApplicationDetailsForm(
                     }
                 },
                 label = { Text(stringResource(R.string.contact_details)) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -522,6 +548,7 @@ fun JobApplicationDetailsForm(
                 value = currentJob.notes ?: "",
                 onValueChange = { jobApplicationViewModel.updateJobDetailFieldsUiStates { copy(notes = it) } },
                 label = { Text(stringResource(R.string.notes)) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
