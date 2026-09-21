@@ -506,6 +506,7 @@ fun JobApplicationDetailsForm(
                     }
                 },
                 label = { Text(stringResource(R.string.job_type)) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
