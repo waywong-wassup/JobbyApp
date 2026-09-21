@@ -71,6 +71,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale.getDefault
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -618,25 +621,24 @@ class DateTransformation : VisualTransformation {
 
 class DummyJobRepository : com.jobapplicationapp.jobby.data.JobApplicationRepository {
     override fun getAllJobApplications(userId: String) =
-        kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+        MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
 
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
-    override fun getJobApplicationById(id: String) = kotlinx.coroutines.flow.flowOf(null)
+    override fun getJobApplicationById(id: String) = flowOf(null)
     override fun getUnsyncedJobApplications(userId: String) =
-        kotlinx.coroutines.flow.MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+       MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
 }
 
 class DummyUserRepository : com.jobapplicationapp.jobby.data.UserRepository {
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
-    override fun getCurrentUser(userId: String) = kotlinx.coroutines.flow.flowOf(null)
+    override fun getCurrentUser(userId: String) = flowOf(null)
 }
 
 class DummyUserPreferencesRepository : com.jobapplicationapp.jobby.data.UserPreferencesRepository {
-    override val isSyncEnabled: kotlinx.coroutines.flow.Flow<Boolean> =
-        kotlinx.coroutines.flow.flowOf(false)
+    override val isSyncEnabled: Flow<Boolean> = flowOf(false)
 
     override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
 }
