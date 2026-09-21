@@ -1,10 +1,18 @@
 # Jobby 💼
+Losing track of all the jobs you have applied?!
+
+<img width="180" height="170" alt="image" src="https://github.com/user-attachments/assets/1decc69d-71d9-43ea-b33b-e90d2e9abdf5" />
 
 **Jobby** is a modern, offline-first Android application designed to be your ultimate job search buddy. Built with Jetpack Compose and Firebase, it helps you organise your job hunt by tracking applications, interviews, and offers in one centralised place.
 
 <img width="150" height="150" alt="Screenshot 2026-08-18 221358" src="https://github.com/user-attachments/assets/51c8db0b-fda5-4990-8a23-dc5979e205d8" />
 
 (originally, the sign the person holding in the app icon was "hire me plz" 😏)
+
+### Good Luck
+May you land your job faster than I do !!! 
+
+<img width="175" height="175" alt="image" src="https://github.com/user-attachments/assets/f71280b1-1bd5-4a7d-b559-42b220d5af70" />
 
 ## 🚀 Features
 
@@ -77,4 +85,9 @@ graph TD
     *   Sync Gradle and run the app on your emulator or physical device.
 
 
+
+## 🔜 WIP and Upcoming Features
+* Better Detail screen experience
+* Filter and Sorting job lists
+* Summary and stats, a glance of how many jobs have rejected/ghosted you.
 
