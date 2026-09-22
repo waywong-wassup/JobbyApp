@@ -1,5 +1,7 @@
 package com.jobapplicationapp.jobby.data
 
+import com.jobapplicationapp.jobby.data.model.JobApplication
+import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -45,6 +47,12 @@ class FakeJobApplicationRepository : JobApplicationRepository {
         //go through all items in the list and check id matches, return the one that matches
         return jobApplicationsFlow.map { list ->
             list.find { it.jobApplicationId == id }
+        }
+    }
+
+    override fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>> {
+        return jobApplicationsFlow.map { list ->
+            list.filter { it.userId == userId && !it.isSynced }
         }
     }
 }

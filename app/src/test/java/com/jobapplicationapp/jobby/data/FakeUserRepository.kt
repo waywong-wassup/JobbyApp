@@ -1,5 +1,7 @@
 package com.jobapplicationapp.jobby.data
 
+import com.jobapplicationapp.jobby.data.model.User
+import com.jobapplicationapp.jobby.data.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
