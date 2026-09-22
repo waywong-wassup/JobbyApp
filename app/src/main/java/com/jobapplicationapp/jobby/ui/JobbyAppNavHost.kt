@@ -14,9 +14,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.jobapplicationapp.jobby.JobbyApplication
-import com.jobapplicationapp.jobby.data.OFFLINE_USER_ID
-import com.jobapplicationapp.jobby.data.User
+import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
+import com.jobapplicationapp.jobby.data.model.User
 import com.jobapplicationapp.jobby.ui.components.LoadingScreen
+import com.jobapplicationapp.jobby.ui.screens.JobApplicationDetailsScreen
+import com.jobapplicationapp.jobby.ui.screens.JobApplicationListScreen
+import com.jobapplicationapp.jobby.ui.screens.StartScreen
+import com.jobapplicationapp.jobby.viewmodel.AppViewModelProvider
+import com.jobapplicationapp.jobby.viewmodel.AuthUiState
+import com.jobapplicationapp.jobby.viewmodel.AuthViewModel
+import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
+import com.jobapplicationapp.jobby.viewmodel.UserUiState
+import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -48,7 +57,7 @@ fun JobbyAppNavHost(
 
     // handle Firebase Login status changes
     LaunchedEffect(authUiState) {
-        if (authUiState is AuthUiState.Success) { 
+        if (authUiState is AuthUiState.Success) {
             val user = (authUiState as AuthUiState.Success).user
             val uid = user.uid
             jobApplicationViewModel.setUserId(uid)
@@ -82,7 +91,7 @@ fun JobbyAppNavHost(
     // handle Auto-Skip for Offline User
     LaunchedEffect(localUserUiState) {
         // If we found a local user (either Guest or Firebase) and we are currently on the Start screen
-        if (localUserUiState is UserUiState.Success && 
+        if (localUserUiState is UserUiState.Success &&
             navController.currentDestination?.route?.contains("StartScreenRoute") == true) {
             
             navController.navigate(JobApplicationListScreenRoute) {

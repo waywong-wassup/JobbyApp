@@ -5,6 +5,17 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.jobapplicationapp.jobby.data.local.AppDatabase
+import com.jobapplicationapp.jobby.data.local.OfflineJobApplicationRepository
+import com.jobapplicationapp.jobby.data.local.OfflineUserRepository
+import com.jobapplicationapp.jobby.data.remote.AuthRepository
+import com.jobapplicationapp.jobby.data.remote.FirebaseAuthRepository
+import com.jobapplicationapp.jobby.data.remote.FirestoreJobApplicationRepository
+import com.jobapplicationapp.jobby.data.repository.DataStoreUserPreferencesRepository
+import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
+import com.jobapplicationapp.jobby.data.repository.SyncJobApplicationRepository
+import com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository
+import com.jobapplicationapp.jobby.data.repository.UserRepository
 import kotlinx.coroutines.MainScope
 
 
@@ -23,7 +34,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
     private val applicationScope = MainScope()
 
     override val jobApplicationRepository: JobApplicationRepository by lazy {
-        val local = OfflineJobApplicationRepository(AppDatabase.getDatabase(context).jobApplicationDao())
+        val local =
+            OfflineJobApplicationRepository(AppDatabase.getDatabase(context).jobApplicationDao())
         val remote = FirestoreJobApplicationRepository(Firebase.firestore, Firebase.auth)
         SyncJobApplicationRepository(local, remote, userPreferencesRepository, applicationScope)
     }

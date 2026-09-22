@@ -9,10 +9,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
-import com.jobapplicationapp.jobby.data.JobApplication
-import com.jobapplicationapp.jobby.data.JobApplicationRepository
-import com.jobapplicationapp.jobby.data.User
-import com.jobapplicationapp.jobby.data.UserRepository
+import com.jobapplicationapp.jobby.data.model.JobApplication
+import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
+import com.jobapplicationapp.jobby.data.model.User
+import com.jobapplicationapp.jobby.data.repository.UserRepository
+import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
+import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -56,6 +58,7 @@ class JobbyAppNavHostTest {
             _jobs.update { list -> list.filter { it.jobApplicationId != job.jobApplicationId } }
         }
         override fun getJobApplicationById(id: String) = flowOf(_jobs.value.find { it.jobApplicationId == id })
+        override fun getUnsyncedJobApplications(userId: String) = flowOf(emptyList<JobApplication>())
     }
 
     class FakeUserRepository : UserRepository {
@@ -70,7 +73,7 @@ class JobbyAppNavHostTest {
     ) {
         val jobViewModel = JobApplicationViewModel(jobRepository)
         jobViewModel.setUserId("1")
-        val userViewModel = UserViewModel(userRepository)
+        val userViewModel = UserViewModel(userRepository, jobRepository, DummyUserPreferencesRepository())
         userViewModel.setUserId("1")
 
         composeTestRule.setContent {
@@ -156,4 +159,9 @@ class JobbyAppNavHostTest {
         assert(route?.contains("JobApplicationListScreenRoute") == true)
         composeTestRule.onNodeWithText(testJob.jobTitle).assertDoesNotExist()
     }
+}
+
+class DummyUserPreferencesRepository : com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository {
+    override val isSyncEnabled: kotlinx.coroutines.flow.Flow<Boolean> = flowOf(false)
+    override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
 }
