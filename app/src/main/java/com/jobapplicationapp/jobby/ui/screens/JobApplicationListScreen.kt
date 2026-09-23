@@ -63,6 +63,7 @@ import com.jobapplicationapp.jobby.ui.theme.onWarningContainerLight
 import com.jobapplicationapp.jobby.ui.theme.warningContainerDark
 import com.jobapplicationapp.jobby.ui.theme.warningContainerLight
 import com.jobapplicationapp.jobby.viewmodel.AppViewModelProvider
+import com.jobapplicationapp.jobby.viewmodel.AuthViewModel
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationUiState
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserUiState
@@ -73,9 +74,11 @@ import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 fun JobApplicationListScreen(
     jobApplicationViewModel: JobApplicationViewModel = viewModel(factory = AppViewModelProvider.Factory),
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AppViewModelProvider.Factory),
     modifier: Modifier = Modifier,
     onEditClick: (String) -> Unit = {},
-    onAddClick: () -> Unit = {}
+    onAddClick: () -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val jobUiState by jobApplicationViewModel.uiState.collectAsState()
     val userUiState by userViewModel.userUiState.collectAsState()
@@ -127,7 +130,14 @@ fun JobApplicationListScreen(
                         onSyncToggle = { enabled ->
                             userViewModel.setSyncEnabled(enabled)
                         },
-                        syncToggleEnabled = user.userId != OFFLINE_USER_ID
+                        syncToggleEnabled = user.userId != OFFLINE_USER_ID,
+                        onLogout = {
+                            authViewModel.signOut()
+                            // clear userIds to ensure offline user state is reset
+                            jobApplicationViewModel.setUserId("")
+                            userViewModel.setUserId("")
+                            onLogout()
+                        }
                     )
                 }
             }
