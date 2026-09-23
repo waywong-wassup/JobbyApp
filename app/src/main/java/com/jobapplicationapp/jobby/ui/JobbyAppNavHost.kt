@@ -141,6 +141,11 @@ fun JobbyAppNavHost(
                 onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
                 onAddClick = {
                     navController.navigate(JobApplicationDetailsScreenRoute("0"))
+                },
+                onLogout = {
+                    navController.navigate(StartScreenRoute) {
+                        popUpTo(JobApplicationListScreenRoute) { inclusive = true }
+                    }
                 }
             )
         }

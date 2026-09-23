@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -37,7 +38,8 @@ fun EditUserDetailsBottomSheet(
     onSave: (firstName: String, lastName: String) -> Unit,
     initialSyncEnabled: Boolean,
     onSyncToggle: (enabled: Boolean) -> Unit,
-    syncToggleEnabled: Boolean = true // Add this parameter
+    syncToggleEnabled: Boolean = true,
+    onLogout: () -> Unit
 ) {
     var firstName by remember { mutableStateOf(defaultFirstname) }
     var lastName by remember { mutableStateOf(defaultLastName) }
@@ -84,6 +86,20 @@ fun EditUserDetailsBottomSheet(
                 Text(text = "Save")
             }
 
+            OutlinedButton(
+                onClick = {
+                    onDismiss()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text(text = "Log Out")
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -115,6 +131,7 @@ fun EditUserDetailsBottomSheetPreview() {
         onDismiss = {},
         onSave = { _, _ -> },
         initialSyncEnabled = true,
-        onSyncToggle = {}
+        onSyncToggle = {},
+        onLogout = {}
     )
 }
