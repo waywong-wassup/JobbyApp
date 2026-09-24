@@ -20,7 +20,7 @@ interface JobApplicationDao {
     @Delete
     suspend fun deleteJobApplication(jobApplication: JobApplication)
 
-    @Query("SELECT * from JobApplication WHERE userId = :userId ORDER BY jobApplicationId ASC")
+    @Query("SELECT * from JobApplication WHERE userId = :userId ORDER BY lastModified DESC")
     fun getAllJobApplications(userId: String): Flow<List<JobApplication>>
 
     @Query("SELECT * from JobApplication WHERE jobApplicationId = :id")

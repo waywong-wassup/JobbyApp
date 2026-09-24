@@ -5,6 +5,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,17 +20,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -84,6 +92,9 @@ fun JobApplicationListScreen(
     val userUiState by userViewModel.userUiState.collectAsState()
     var showUserDetailsEditSheet by remember { mutableStateOf(false) }
     val isSyncEnabled by userViewModel.isSyncEnabledState.collectAsState()
+    var searchQuery by remember {mutableStateOf("")}
+    var isSearchActive by remember {mutableStateOf(false)}
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -110,11 +121,40 @@ fun JobApplicationListScreen(
         when(jobUiState){
             is JobApplicationUiState.Loading -> {}
             is JobApplicationUiState.Success ->{
-                JobApplicationList(
-                    jobApplications = (jobUiState as JobApplicationUiState.Success).jobApplications,
-                    onEditClick = onEditClick,
-                    modifier = Modifier.padding(innerPadding)
-                )
+                val jobApplications = (jobUiState as JobApplicationUiState.Success).jobApplications
+
+                val filteredJobApplications = remember(jobApplications, searchQuery) {
+                    if (searchQuery.isBlank()) {
+                        jobApplications //display the original list if search query is blank
+                    } else {
+                        jobApplications.filter { application ->
+                                    application.jobTitle.contains(searchQuery, ignoreCase = true) ||
+                                    application.companyName.contains(searchQuery, ignoreCase = true) ||
+                                    application.location?.contains(searchQuery, ignoreCase = true) == true ||
+                                    application.progress.contains(searchQuery, ignoreCase = true)
+                            }
+                        }
+                    }
+
+                Column(modifier = Modifier.padding(
+                    top = innerPadding.calculateTopPadding()
+                    )
+                    )
+                {
+                    SearchBar(
+                        searchQuery = searchQuery,
+                        onQueryChange = { searchQuery = it },
+                        onActiveChange = { isSearchActive = it }
+                    )
+
+
+                    JobApplicationList(
+                        jobApplications = filteredJobApplications,
+                        onEditClick = onEditClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
                 if (showUserDetailsEditSheet) {
                     val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
                     EditUserDetailsBottomSheet(
@@ -218,6 +258,68 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBar(
+    searchQuery: String,
+    onQueryChange: (String) -> Unit,
+    onActiveChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    val searchBarColors = SearchBarDefaults.colors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    )
+
+    DockedSearchBar(
+        inputField = {
+            SearchBarDefaults.InputField(
+                query = searchQuery,
+                onQueryChange = onQueryChange,
+                onSearch = { onActiveChange(false) },
+                expanded = false,
+                onExpandedChange = { },
+                enabled = true,
+                placeholder = { Text(
+                    text = "Search applications...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+                              },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search"
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("")}) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear search"
+                            )
+                        }
+                    }
+                },
+                colors = SearchBarDefaults.inputFieldColors(),
+                interactionSource = null,
+            )
+        },
+        expanded = false,
+        onExpandedChange = { },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+        shape = CircleShape,
+        colors = searchBarColors,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        content = {}
+    )
+
+}
 
 @Composable
 fun JobApplicationList(
@@ -227,8 +329,13 @@ fun JobApplicationList(
 ){
     LazyColumn(
         modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 8.dp,
+            bottom = 16.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(jobApplications.size) { i ->
