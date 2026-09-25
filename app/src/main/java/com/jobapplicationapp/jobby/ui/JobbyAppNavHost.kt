@@ -1,5 +1,8 @@
 package com.jobapplicationapp.jobby.ui
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,15 +14,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.jobapplicationapp.jobby.JobbyApplication
 import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.model.User
+import com.jobapplicationapp.jobby.ui.components.BottomNavigationBar
 import com.jobapplicationapp.jobby.ui.components.LoadingScreen
 import com.jobapplicationapp.jobby.ui.screens.JobApplicationDetailsScreen
 import com.jobapplicationapp.jobby.ui.screens.JobApplicationListScreen
 import com.jobapplicationapp.jobby.ui.screens.StartScreen
+import com.jobapplicationapp.jobby.ui.screens.SummaryScreen
 import com.jobapplicationapp.jobby.viewmodel.AppViewModelProvider
 import com.jobapplicationapp.jobby.viewmodel.AuthUiState
 import com.jobapplicationapp.jobby.viewmodel.AuthViewModel
@@ -35,6 +41,8 @@ object StartScreenRoute
 object JobApplicationListScreenRoute
 @Serializable
 data class JobApplicationDetailsScreenRoute (val id: String)
+@Serializable
+object SummaryScreenRoute
 
 @Composable
 fun JobbyAppNavHost(
@@ -48,6 +56,10 @@ fun JobbyAppNavHost(
     val localUserUiState by userViewModel.userUiState.collectAsState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val showBottomBar = currentRoute?.contains("JobApplicationListScreenRoute") == true ||
+            currentRoute?.contains("SummaryScreenRoute") == true
 
     // Wait until the initial auth check is finished
     if (authUiState is AuthUiState.Loading) {
@@ -100,79 +112,108 @@ fun JobbyAppNavHost(
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = if (authUiState is AuthUiState.Success) JobApplicationListScreenRoute else StartScreenRoute, //initial launch destination
-        modifier = modifier
-    ) {
-        composable<StartScreenRoute> {
-            StartScreen(
-                onLoginSuccess = {
-                    navController.navigate(JobApplicationListScreenRoute) {
-                        popUpTo(StartScreenRoute) { inclusive = true }
-                    // remove StartScreen from backstack, inclusive = true means including remove StartScreen
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavigationBar(
+                    currentRoute = currentRoute,
+                    onNavigateToApplicationsScreen = {
+                        navController.navigate(JobApplicationListScreenRoute) {
+                            popUpTo(JobApplicationListScreenRoute) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToSummaryScreen = {
+                        navController.navigate(SummaryScreenRoute) {
+                            popUpTo(JobApplicationListScreenRoute) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
-                },
-                onSkipLogin = { firstName, lastName ->
-                    // set offline user id if user choose not to login
-                    jobApplicationViewModel.setUserId(OFFLINE_USER_ID)
-                    userViewModel.setUserId(OFFLINE_USER_ID)
+                )
+            }
+        },
+        contentWindowInsets = WindowInsets(0) //to remove the extra padding introduced by extra Scaffold
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = if (authUiState is AuthUiState.Success) JobApplicationListScreenRoute else StartScreenRoute, //initial launch destination
+            modifier = modifier.padding(innerPadding)
+        ) {
+            composable<StartScreenRoute> {
+                StartScreen(
+                    onLoginSuccess = {
+                        navController.navigate(JobApplicationListScreenRoute) {
+                            popUpTo(StartScreenRoute) { inclusive = true }
+                            // remove StartScreen from backstack, inclusive = true means including remove StartScreen
+                        }
+                    },
+                    onSkipLogin = { firstName, lastName ->
+                        // set offline user id if user choose not to login
+                        jobApplicationViewModel.setUserId(OFFLINE_USER_ID)
+                        userViewModel.setUserId(OFFLINE_USER_ID)
 
-                    scope.launch {
-                        userViewModel.saveUserToDatabase(
-                            User(
-                                userId = OFFLINE_USER_ID,
-                                firstName = firstName.ifBlank { "Offline" },
-                                lastName = lastName.ifBlank { "User" }
+                        scope.launch {
+                            userViewModel.saveUserToDatabase(
+                                User(
+                                    userId = OFFLINE_USER_ID,
+                                    firstName = firstName.ifBlank { "Offline" },
+                                    lastName = lastName.ifBlank { "User" }
+                                )
                             )
-                        )
+                        }
+
+                        navController.navigate(JobApplicationListScreenRoute) {
+                            popUpTo(StartScreenRoute) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable<JobApplicationListScreenRoute> {
+                JobApplicationListScreen(
+                    jobApplicationViewModel = jobApplicationViewModel,
+                    userViewModel = userViewModel,
+                    onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
+                    onAddClick = {
+                        navController.navigate(JobApplicationDetailsScreenRoute("0"))
+                    },
+                    onLogout = {
+                        navController.navigate(StartScreenRoute) {
+                            popUpTo(JobApplicationListScreenRoute) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable<JobApplicationDetailsScreenRoute> { backStack ->
+                val details: JobApplicationDetailsScreenRoute = backStack.toRoute()
+
+                //LaunchedEffect, for running this code just once when this screen first appear
+                LaunchedEffect(details.id) {
+                    jobApplicationViewModel.loadJobApplication(details.id)
+                }
+
+                JobApplicationDetailsScreen(
+                    jobApplicationViewModel = jobApplicationViewModel,
+                    userViewModel = userViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onDiscardClick = { navController.popBackStack() },
+                    onSaveClick = {
+                        navController.popBackStack()
+                    },
+                    onDeleteClick = {
+                        navController.popBackStack()
+                    },
+                    onConfirmDelete = {
+                        navController.popBackStack()
                     }
 
-                    navController.navigate(JobApplicationListScreenRoute) {
-                        popUpTo(StartScreenRoute) { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable<JobApplicationListScreenRoute> {
-            JobApplicationListScreen(
-                jobApplicationViewModel = jobApplicationViewModel,
-                userViewModel = userViewModel,
-                onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
-                onAddClick = {
-                    navController.navigate(JobApplicationDetailsScreenRoute("0"))
-                },
-                onLogout = {
-                    navController.navigate(StartScreenRoute) {
-                        popUpTo(JobApplicationListScreenRoute) { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable<JobApplicationDetailsScreenRoute> { backStack ->
-            val details: JobApplicationDetailsScreenRoute = backStack.toRoute()
-
-            //LaunchedEffect, for running this code just once when this screen first appear
-            LaunchedEffect(details.id) {
-                jobApplicationViewModel.loadJobApplication(details.id)
+                )
             }
 
-            JobApplicationDetailsScreen(
-                jobApplicationViewModel = jobApplicationViewModel,
-                userViewModel = userViewModel,
-                onBackClick = { navController.popBackStack() },
-                onDiscardClick = { navController.popBackStack() },
-                onSaveClick = {
-                    navController.popBackStack()
-                },
-                onDeleteClick = {
-                    navController.popBackStack()
-                },
-                onConfirmDelete = {
-                    navController.popBackStack()
-                }
-
-            )
+            composable<SummaryScreenRoute> {
+                SummaryScreen(jobApplicationViewModel = jobApplicationViewModel)
+            }
         }
     }
 }

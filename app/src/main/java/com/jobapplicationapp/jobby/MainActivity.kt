@@ -15,18 +15,13 @@ import com.jobapplicationapp.jobby.ui.JobbyAppNavHost
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-
                     JobbyAppNavHost()
                 }
-            }
-
         }
     }
 }
