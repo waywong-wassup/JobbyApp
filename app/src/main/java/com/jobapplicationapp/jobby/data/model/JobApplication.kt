@@ -29,7 +29,7 @@ data class JobApplication(
     var companyName: String = "",
     var appliedDate: String? = null,
     var location: String?= null,
-    var salary: Long? = null, // save as cents and convert to decimal points later
+    var salary: Long? = null, // saved in dollars (e.g. 85000 for $85,000)
     var applicationURL: String? = null,
     var progress: String = "To Apply" ,
     var contactName: String? = null,
