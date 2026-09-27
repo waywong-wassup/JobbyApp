@@ -465,7 +465,10 @@ fun getProgressColor(progress: String): Pair<Color, Color> {
             else warningContainerLight to onWarningContainerLight
         }
         "Rejected" -> {
-            Color(0xFFFF746C) to MaterialTheme.colorScheme.onErrorContainer
+            Color(0xFF9F1239) to Color(0xFFFFF1F2) // Deep Crimson & Soft Rose
+        }
+        "Ghosted" -> {
+            Color(0xFF475569) to Color(0xFFF8FAFC) // Deep Slate & Soft Feather White
         }
         "To Apply" -> {
             MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant

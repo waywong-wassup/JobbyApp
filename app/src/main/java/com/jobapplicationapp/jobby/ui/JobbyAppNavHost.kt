@@ -212,7 +212,16 @@ fun JobbyAppNavHost(
             }
 
             composable<SummaryScreenRoute> {
-                SummaryScreen(jobApplicationViewModel = jobApplicationViewModel)
+                SummaryScreen(
+                    jobApplicationViewModel = jobApplicationViewModel,
+                    onBackClick = {
+                        navController.navigate(JobApplicationListScreenRoute) {
+                            popUpTo(JobApplicationListScreenRoute) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     }

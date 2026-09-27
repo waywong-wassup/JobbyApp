@@ -37,9 +37,7 @@ fun BottomNavigationBar(
         containerColor = MaterialTheme.colorScheme.primary, // to match TopBar primary color
         tonalElevation = 0.dp,
         modifier = Modifier
-            .padding(start = 64.dp, end = 64.dp, top = 16.dp, bottom = 16.dp)
-            .height(76.dp)
-            .clip(RoundedCornerShape(28.dp))
+            .height(88.dp)
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.AutoMirrored.Filled.ListAlt, contentDescription = "Applications") },
