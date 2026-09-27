@@ -32,9 +32,10 @@ May you land your job faster than I do !!!
 
 ## 📸 Screenshots
 
-| Start Screen | List Screen | Details Screen |
-| :---: | :---: | :---: |
-|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/ab4ffd25-b60c-40c5-bbba-e0dbf82ca841" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/972ee9c5-4e36-4aed-9d64-f16404077d3c" />|
+| Start Screen | List Screen | Details Screen | Summary Screen |
+| :---: | :---: | :---: | :---: |
+|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1b71a622-6460-4ebe-b460-da7869c447c8" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/49f47ce3-333b-4907-a66c-dd948997eaf9" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/40ddfd2a-e543-4554-874b-8abc2db51cd1" />
+
 
 
 ## 🛠 Tech Stack
@@ -87,7 +88,7 @@ graph TD
 
 
 ## 🔜 WIP and Upcoming Features
-* Better Detail screen experience
+* <s>Better Detail screen experience </s> DONE
 * Filter and Sorting job lists
-* Summary and stats, a glance of how many jobs have rejected/ghosted you.
+* <s>Summary and stats, a glance of how many jobs have rejected/ghosted you. </s> DONE
 
