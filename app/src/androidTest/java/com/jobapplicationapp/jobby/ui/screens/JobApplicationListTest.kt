@@ -7,8 +7,18 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.jobapplicationapp.jobby.data.model.JobApplication
+import com.jobapplicationapp.jobby.data.model.SortOption
 import com.jobapplicationapp.jobby.data.model.User
+import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
+import com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository
+import com.jobapplicationapp.jobby.data.repository.UserRepository
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
+import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
+import com.jobapplicationapp.jobby.viewmodel.UserViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 
@@ -180,6 +190,97 @@ class JobApplicationListTest {
         composeTestRule.onNodeWithText("A".repeat(100), substring = true).assertIsDisplayed()
     }
 
+    @Test
+    fun sortDropDownButton_click_opensDropdownMenuWithSortOptions() {
+        composeTestRule.setContent {
+            AppTheme {
+                SortDropDownButton(
+                    selectedSortOption = SortOption.LAST_MODIFIED_DESC,
+                    onSortOptionsSelected = {}
+                )
+            }
+        }
 
+        // Open menu
+        composeTestRule.onNodeWithContentDescription("Sort Applications").performClick()
 
+        // Assert sort options are displayed
+        composeTestRule.onNodeWithText("Last Modified: Newest").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Last Modified: Oldest").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Date Applied: Newest").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Date Applied: Oldest").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Job Title A-Z").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Salary (High to Low)").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Progress").assertIsDisplayed()
+    }
+
+    @Test
+    fun sortDropDownButton_selectOption_triggersCallback() {
+        var selectedOption: SortOption? = null
+        composeTestRule.setContent {
+            AppTheme {
+                SortDropDownButton(
+                    selectedSortOption = SortOption.LAST_MODIFIED_DESC,
+                    onSortOptionsSelected = { selectedOption = it }
+                )
+            }
+        }
+
+        // Open menu and select Job Title A-Z
+        composeTestRule.onNodeWithContentDescription("Sort Applications").performClick()
+        composeTestRule.onNodeWithText("Job Title A-Z").performClick()
+
+        assert(selectedOption == SortOption.JOB_TITLE_ASC)
+    }
+
+    @Test
+    fun jobApplicationListScreen_sortingOptionChange_updatesUi() {
+        val zebraJob = testJob1.copy(jobApplicationId = "101", jobTitle = "Zebra Specialist", salary = 50000)
+        val appleJob = testJob2.copy(jobApplicationId = "102", jobTitle = "Apple Developer", salary = 150000)
+
+        val testRepo = object : JobApplicationRepository {
+            private val jobs = MutableStateFlow(listOf(zebraJob, appleJob))
+            override fun getAllJobApplications(userId: String) = jobs.asStateFlow()
+            override suspend fun addJobApplication(job: JobApplication) {}
+            override suspend fun updateJobApplication(job: JobApplication) {}
+            override suspend fun deleteJobApplication(job: JobApplication) {}
+            override fun getJobApplicationById(id: String) = flowOf(null)
+            override fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>> = flowOf(emptyList())
+        }
+
+        val testUserRepo = object : UserRepository {
+            override suspend fun deleteUser(user: User) {}
+            override suspend fun addUser(user: User) {}
+            override fun getCurrentUser(userId: String) = flowOf(User.sampleUser)
+        }
+
+        val testUserPrefRepo = object : UserPreferencesRepository {
+            override val isSyncEnabled: Flow<Boolean> = flowOf(false)
+            override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
+        }
+
+        val viewModel = JobApplicationViewModel(testRepo).apply { setUserId("1") }
+        val userViewModel = UserViewModel(testUserRepo, testRepo, testUserPrefRepo).apply { setUserId("1") }
+
+        composeTestRule.setContent {
+            AppTheme {
+                JobApplicationListScreen(
+                    jobApplicationViewModel = viewModel,
+                    userViewModel = userViewModel
+                )
+            }
+        }
+
+        // Initially both items exist
+        composeTestRule.onNodeWithText("Zebra Specialist").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Apple Developer").assertIsDisplayed()
+
+        // Open sort menu and select Job Title A-Z
+        composeTestRule.onNodeWithContentDescription("Sort Applications").performClick()
+        composeTestRule.onNodeWithText("Job Title A-Z").performClick()
+
+        // Verify items remain displayed correctly after sort selection
+        composeTestRule.onNodeWithText("Apple Developer").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Zebra Specialist").assertIsDisplayed()
+    }
 }
