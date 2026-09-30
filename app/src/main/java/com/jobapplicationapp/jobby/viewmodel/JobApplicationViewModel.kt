@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
+import com.jobapplicationapp.jobby.data.model.SortOption
+import com.jobapplicationapp.jobby.data.model.sortJobApplications
 import com.jobapplicationapp.jobby.data.model.JobApplication
 import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
 import kotlinx.coroutines.flow.*

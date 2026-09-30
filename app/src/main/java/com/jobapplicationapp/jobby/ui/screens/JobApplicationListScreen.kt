@@ -1,11 +1,12 @@
 package com.jobapplicationapp.jobby.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +20,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
@@ -27,15 +30,19 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DockedSearchBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -76,7 +83,7 @@ import com.jobapplicationapp.jobby.viewmodel.JobApplicationUiState
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserUiState
 import com.jobapplicationapp.jobby.viewmodel.UserViewModel
-
+import com.jobapplicationapp.jobby.data.model.SortOption
 
 @Composable
 fun JobApplicationListScreen(
@@ -94,6 +101,7 @@ fun JobApplicationListScreen(
     val isSyncEnabled by userViewModel.isSyncEnabledState.collectAsState()
     var searchQuery by remember {mutableStateOf("")}
     var isSearchActive by remember {mutableStateOf(false)}
+    val sortOption by jobApplicationViewModel.sortOption.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -141,11 +149,28 @@ fun JobApplicationListScreen(
                     )
                     )
                 {
-                    SearchBar(
-                        searchQuery = searchQuery,
-                        onQueryChange = { searchQuery = it },
-                        onActiveChange = { isSearchActive = it }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SearchBar(
+                            searchQuery = searchQuery,
+                            onQueryChange = { searchQuery = it },
+                            onActiveChange = { isSearchActive = it },
+                            modifier = modifier.weight(0.85f)
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        SortDropDownButton(
+                            selectedSortOption = sortOption,
+                            onSortOptionsSelected = { newSortOption ->
+                                jobApplicationViewModel.updateSortOption(newSortOption)
+                            }
+                        )
+                    }
 
 
                     JobApplicationList(
@@ -290,7 +315,8 @@ fun SearchBar(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
+                        contentDescription = "Search",
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 },
                 trailingIcon = {
@@ -309,9 +335,7 @@ fun SearchBar(
         },
         expanded = false,
         onExpandedChange = { },
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+        modifier = modifier.fillMaxWidth(),
         shape = CircleShape,
         colors = searchBarColors,
         tonalElevation = 0.dp,
@@ -451,6 +475,81 @@ fun JobApplicationCard(
 }
 
 @Composable
+fun SortDropDownButton(
+    selectedSortOption: SortOption,
+    onSortOptionsSelected: (SortOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        FilledTonalIconButton(
+            onClick = { isExpanded = true },
+            modifier = Modifier.size(56.dp),
+            shape = CircleShape,
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Sort,
+                contentDescription = "Sort Applications",
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+
+        DropdownMenu(
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false },
+            shape = RoundedCornerShape(18.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = 6.dp,
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            )
+        ) {
+            SortOption.entries.forEach { option ->
+                val isSelected = option == selectedSortOption
+
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = option.displayName,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    onClick = {
+                        onSortOptionsSelected(option)
+                        isExpanded = false
+                    },
+                    leadingIcon = if (isSelected) {
+                        {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
+                    } else null,
+                    colors = MenuDefaults.itemColors(
+                        textColor = if (isSelected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
+                        leadingIconColor = if (isSelected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.secondary
+                            else Color.Transparent
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun getProgressColor(progress: String): Pair<Color, Color> {
     val isDark = isSystemInDarkTheme()
     return when (progress) {
@@ -479,43 +578,48 @@ fun getProgressColor(progress: String): Pair<Color, Color> {
     }
 }
 
-
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun JobApplicationCardPreview() {
-    AppTheme{
-    JobApplicationCard(jobApplication = JobApplication.sampleJobApplication[0]
-    )}
+    AppTheme {
+        JobApplicationCard(jobApplication = JobApplication.sampleJobApplication[0])
+    }
 }
 
-//@Preview
+@Preview(showBackground = true)
 @Composable
-private fun JobApplicationListPreview() {
-    JobApplicationList(jobApplications = JobApplication.sampleJobApplication, onEditClick = {})
+fun JobApplicationListPreview() {
+    AppTheme {
+        JobApplicationList(jobApplications = JobApplication.sampleJobApplication, onEditClick = {})
+    }
 }
 
-//@Preview
+@Preview(showBackground = true)
 @Composable
-private fun JobbyTopBarPreview() {
+fun JobbyTopBarPreview() {
     AppTheme {
         JobbyTopBar(user = User.sampleUser)
     }
 }
 
-@Preview(showBackground = true, heightDp = 400)
+@Preview(showBackground = true, heightDp = 600)
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember {
         JobApplicationViewModel(
             DummyJobRepository()
-        )
+        ).apply {
+            setUserId("1")
+        }
     }
     val dummyUserViewModel = remember {
         UserViewModel(
             userRepository = DummyUserRepository(),
             jobApplicationRepository = DummyJobRepository(),
             userPreferencesRepository = DummyUserPreferencesRepository()
-        )
+        ).apply {
+            setUserId("1")
+        }
     }
 
     AppTheme {
@@ -524,5 +628,4 @@ fun JobApplicationListScreenPreview() {
             userViewModel = dummyUserViewModel
         )
     }
-
 }

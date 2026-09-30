@@ -1,6 +1,4 @@
-package com.jobapplicationapp.jobby.viewmodel
-
-import com.jobapplicationapp.jobby.data.model.JobApplication
+package com.jobapplicationapp.jobby.data.model
 
 /**
  * Defines all available sorting criteria for Job Applications.
@@ -31,6 +29,18 @@ fun List<JobApplication>.sortJobApplications(sortOption: SortOption): List<JobAp
         )
         SortOption.JOB_TITLE_ASC -> sortedBy { it.jobTitle }
         SortOption.SALARY_DESC -> sortedByDescending { it.salary ?: 0L} //if salary is null, set to 0L for sorting purpose
-        SortOption.PROGRESS -> sortedBy { it.progress }
+        SortOption.PROGRESS -> sortedBy { getProgressOrdinal(it.progress) }
     }
+}
+
+/**
+ * Extension function to get the ordinal value of Progress string.
+ * Based on the order in Progress enum, assign a Int value to it.
+ * @param progressString string value of Progress
+ * @return ordinal value of Progress string, or Int.MAX_VALUE if not found. This Int is then used to sorting the list
+ */
+private fun getProgressOrdinal(progressString: String): Int {
+    return Progress.entries.firstOrNull {
+        it.progressPhase.equals(progressString, ignoreCase = true)
+    }?.ordinal ?: Int.MAX_VALUE //assign to MAX_VALUE to ensure unknown items are always at the end
 }

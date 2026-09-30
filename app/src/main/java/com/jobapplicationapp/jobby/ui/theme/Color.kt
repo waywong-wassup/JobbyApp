@@ -50,8 +50,8 @@ val warningContainerDark = Color(0xFF514500)
 val onWarningContainerDark = Color(0xFFFFE082)
 
 // --- Dark Theme Colors ---
-val primaryDark = Color(0xFFFFB3B3)
-val onPrimaryDark = Color(0xFF5D111B)
+val primaryDark = Color(0xFF5D111B)
+val onPrimaryDark = Color(0xFFFFDAD9)
 val primaryContainerDark = Color(0xFF7B292F)
 val onPrimaryContainerDark = Color(0xFFFFDAD9)
 
