@@ -17,8 +17,6 @@ class JobApplicationViewModel (
     private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
     private val _userId = MutableStateFlow<String?>(null)
-    private val _currentJobApplication = MutableStateFlow<JobApplication?>(null)
-    val currentJobApplication = _currentJobApplication.asStateFlow()
     private val _changingJobApplication = MutableStateFlow<JobApplication?>(null)
     val changingJobApplication = _changingJobApplication.asStateFlow()
     enum class ValidationError { NONE, JOB_TITLE_REQUIRED, COMPANY_NAME_REQUIRED }

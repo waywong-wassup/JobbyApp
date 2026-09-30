@@ -83,13 +83,10 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
-    userViewModel: UserViewModel,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
-    onConfirmDelete: () -> Unit = {},
-    onDismissDelete: () -> Unit = {}
+    onConfirmDelete: () -> Unit = {}
 ) {
 
     val jobTitleFocusRequester = remember { FocusRequester() }
@@ -675,8 +672,7 @@ fun JobApplicationDetailsScreenPreview() {
 
     AppTheme {
         JobApplicationDetailsScreen(
-            jobApplicationViewModel = dummyJobApplicationViewModel,
-            userViewModel = dummyUserViewModel
+            jobApplicationViewModel = dummyJobApplicationViewModel
         )
     }
 }

@@ -195,13 +195,9 @@ fun JobbyAppNavHost(
 
                 JobApplicationDetailsScreen(
                     jobApplicationViewModel = jobApplicationViewModel,
-                    userViewModel = userViewModel,
                     onBackClick = { navController.popBackStack() },
                     onDiscardClick = { navController.popBackStack() },
                     onSaveClick = {
-                        navController.popBackStack()
-                    },
-                    onDeleteClick = {
                         navController.popBackStack()
                     },
                     onConfirmDelete = {
