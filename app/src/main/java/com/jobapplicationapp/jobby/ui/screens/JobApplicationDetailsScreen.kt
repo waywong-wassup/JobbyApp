@@ -338,7 +338,7 @@ fun JobApplicationDetailsForm(
                     }
                 },
                 label = { Text(stringResource(R.string.location)) },
-                leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.secondary) },
+                leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Next
@@ -376,8 +376,7 @@ fun JobApplicationDetailsForm(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = "Open Link",
-                            tint = MaterialTheme.colorScheme.secondary
+                            contentDescription = "Open Link"
                         )
                     }
 
@@ -397,11 +396,7 @@ fun JobApplicationDetailsForm(
                 placeholder = { Text("dd/mm/yyyy") },
                 trailingIcon = {
                     IconButton(onClick = { onDatePickerClick("appliedDate") }) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Open Calendar",
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
+                        Icon(Icons.Default.DateRange, contentDescription = "Open Calendar")
                     }
                 },
                 keyboardOptions = KeyboardOptions(
@@ -490,11 +485,7 @@ fun JobApplicationDetailsForm(
                 placeholder = { Text("dd/mm/yyyy") },
                 trailingIcon = {
                     IconButton(onClick = { onDatePickerClick("postedDate") }) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Open Calendar",
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
+                        Icon(Icons.Default.DateRange, contentDescription = "Open Calendar")
                     }
                 },
                 keyboardOptions = KeyboardOptions(
@@ -538,7 +529,7 @@ fun JobApplicationDetailsForm(
                     imeAction = ImeAction.Next
                 ),
                 modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.secondary) }
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
             )
             OutlinedTextField(
                 value = currentJob.contactDetails ?: "",

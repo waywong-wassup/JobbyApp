@@ -6,19 +6,18 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.jobapplicationapp.jobby.data.FakeJobApplicationRepository
 import com.jobapplicationapp.jobby.data.model.JobApplication
 import com.jobapplicationapp.jobby.data.model.SortOption
 import com.jobapplicationapp.jobby.data.model.User
-import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository
 import com.jobapplicationapp.jobby.data.repository.UserRepository
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 
@@ -238,14 +237,11 @@ class JobApplicationListTest {
         val zebraJob = testJob1.copy(jobApplicationId = "101", jobTitle = "Zebra Specialist", salary = 50000)
         val appleJob = testJob2.copy(jobApplicationId = "102", jobTitle = "Apple Developer", salary = 150000)
 
-        val testRepo = object : JobApplicationRepository {
-            private val jobs = MutableStateFlow(listOf(zebraJob, appleJob))
-            override fun getAllJobApplications(userId: String) = jobs.asStateFlow()
-            override suspend fun addJobApplication(job: JobApplication) {}
-            override suspend fun updateJobApplication(job: JobApplication) {}
-            override suspend fun deleteJobApplication(job: JobApplication) {}
-            override fun getJobApplicationById(id: String) = flowOf(null)
-            override fun getUnsyncedJobApplications(userId: String): Flow<List<JobApplication>> = flowOf(emptyList())
+        val fakeRepo = FakeJobApplicationRepository().apply {
+            runBlocking {
+                addJobApplication(zebraJob)
+                addJobApplication(appleJob)
+            }
         }
 
         val testUserRepo = object : UserRepository {
@@ -259,8 +255,8 @@ class JobApplicationListTest {
             override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
         }
 
-        val viewModel = JobApplicationViewModel(testRepo).apply { setUserId("1") }
-        val userViewModel = UserViewModel(testUserRepo, testRepo, testUserPrefRepo).apply { setUserId("1") }
+        val viewModel = JobApplicationViewModel(fakeRepo).apply { setUserId("1") }
+        val userViewModel = UserViewModel(testUserRepo, fakeRepo, testUserPrefRepo).apply { setUserId("1") }
 
         composeTestRule.setContent {
             AppTheme {

@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.jobapplicationapp.jobby.data.FakeJobApplicationRepository
 import com.jobapplicationapp.jobby.data.FakeUserRepository
 import com.jobapplicationapp.jobby.data.model.JobApplication
-import com.jobapplicationapp.jobby.data.model.SortOption
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -235,25 +234,6 @@ class JobApplicationViewModelTest {
         val result = viewModel.validateInput()
 
         assertEquals(JobApplicationViewModel.ValidationError.NONE, result)
-    }
-
-    @Test
-    fun updateSortOption_updatesSortOptionStateAndReordersJobs() = runTest {
-        val zebraJob = testDataJob1.copy(jobApplicationId = "101", jobTitle = "Zebra Specialist", salary = 50000)
-        val appleJob = testDataJob1.copy(jobApplicationId = "102", jobTitle = "Apple Developer", salary = 150000)
-
-        fakeJobRepository.addJobApplication(zebraJob)
-        fakeJobRepository.addJobApplication(appleJob)
-
-        viewModel.updateSortOption(SortOption.JOB_TITLE_ASC)
-
-        viewModel.uiState.test {
-            val state = expectMostRecentItem()
-            assertTrue(state is JobApplicationUiState.Success)
-            val sortedList = (state as JobApplicationUiState.Success).jobApplications
-            assertEquals("Apple Developer", sortedList[0].jobTitle)
-            assertEquals("Zebra Specialist", sortedList[1].jobTitle)
-        }
     }
 
 }
