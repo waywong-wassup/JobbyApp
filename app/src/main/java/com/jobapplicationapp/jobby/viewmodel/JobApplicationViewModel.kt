@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
+import com.jobapplicationapp.jobby.data.model.SortOption
+import com.jobapplicationapp.jobby.data.model.sortJobApplications
 import com.jobapplicationapp.jobby.data.model.JobApplication
 import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
 import kotlinx.coroutines.flow.*
@@ -15,24 +17,34 @@ class JobApplicationViewModel (
     private val jobApplicationRepository: JobApplicationRepository
 ) : ViewModel() {
     private val _userId = MutableStateFlow<String?>(null)
+    private val _changingJobApplication = MutableStateFlow<JobApplication?>(null)
+    val changingJobApplication = _changingJobApplication.asStateFlow()
+    enum class ValidationError { NONE, JOB_TITLE_REQUIRED, COMPANY_NAME_REQUIRED }
+    private val _sortOption = MutableStateFlow(SortOption.LAST_MODIFIED_DESC) //default sort option
+    val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<JobApplicationUiState> = _userId
-        .filterNotNull()
-        .flatMapLatest { userId -> jobApplicationRepository.getAllJobApplications(userId)}
-            .map<List<JobApplication>, JobApplicationUiState> {
-                JobApplicationUiState.Success(it)
-            }
+    private val _userJobApplications: Flow<List<JobApplication>> = _userId.filterNotNull().flatMapLatest {
+        userId -> jobApplicationRepository.getAllJobApplications(userId)
+    }
+    val uiState: StateFlow<JobApplicationUiState> = combine(
+        _userJobApplications,
+        _sortOption
+    ) { applications, sort ->
+        applications.sortJobApplications(sort)
+    }
+        .map<List<JobApplication>, JobApplicationUiState> { sortedList ->
+            JobApplicationUiState.Success(sortedList)
+        }
         .catch {
-           emit(JobApplicationUiState.Error)
+            emit(JobApplicationUiState.Error)
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = JobApplicationUiState.Loading
         )
-    private val _currentJobApplication = MutableStateFlow<JobApplication?>(null)
-    val currentJobApplication = _currentJobApplication.asStateFlow()
+
 
     fun addJobApplication(newJobApplication: JobApplication) {
         viewModelScope.launch {
@@ -51,11 +63,6 @@ class JobApplicationViewModel (
             jobApplicationRepository.deleteJobApplication(jobApplication)
         }
     }
-
-
-
-    private val _changingJobApplication = MutableStateFlow<JobApplication?>(null)
-    val changingJobApplication = _changingJobApplication.asStateFlow()
 
     fun updateJobDetailFieldsUiStates(transform: JobApplication.() -> JobApplication) {
         _changingJobApplication.update {
@@ -126,8 +133,6 @@ class JobApplicationViewModel (
         }
     }
 
-    enum class ValidationError { NONE, JOB_TITLE_REQUIRED, COMPANY_NAME_REQUIRED }
-
     fun validateInput() : ValidationError {
         val job = _changingJobApplication.value ?: return ValidationError.NONE
         return when {
@@ -139,6 +144,10 @@ class JobApplicationViewModel (
 
     fun setUserId(id: String) {
         _userId.value = id
+    }
+
+    fun updateSortOption(newSortOption: SortOption) {
+        _sortOption.value = newSortOption
     }
 
  }

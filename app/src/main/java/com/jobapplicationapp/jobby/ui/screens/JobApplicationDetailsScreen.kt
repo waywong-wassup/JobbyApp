@@ -83,13 +83,10 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
-    userViewModel: UserViewModel,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
-    onConfirmDelete: () -> Unit = {},
-    onDismissDelete: () -> Unit = {}
+    onConfirmDelete: () -> Unit = {}
 ) {
 
     val jobTitleFocusRequester = remember { FocusRequester() }
@@ -579,7 +576,7 @@ fun FormSection(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(bottom = 4.dp)
         )
         content() // the composable like text fields in a section
@@ -666,8 +663,7 @@ fun JobApplicationDetailsScreenPreview() {
 
     AppTheme {
         JobApplicationDetailsScreen(
-            jobApplicationViewModel = dummyJobApplicationViewModel,
-            userViewModel = dummyUserViewModel
+            jobApplicationViewModel = dummyJobApplicationViewModel
         )
     }
 }

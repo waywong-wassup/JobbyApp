@@ -27,7 +27,9 @@ class UserViewModel(
     private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
     private val _userId = MutableStateFlow<String?>(null)
-    //private val _isSyncEnabled = MutableStateFlow(false)
+    //for reflecting change on ui
+    private val _changingUserDetails = MutableStateFlow<User?> (null)
+    val changingUserDetails = _changingUserDetails.asStateFlow()
     val isSyncEnabledState: StateFlow<Boolean> = userPreferencesRepository.isSyncEnabled
         .stateIn(
             scope = viewModelScope,
@@ -54,10 +56,6 @@ class UserViewModel(
             setSyncEnabled(false)
         }
     }
-
-    //for reflecting change on ui
-    private val _changingUserDetails = MutableStateFlow<User?> (null)
-    val changingUserDetails = _changingUserDetails.asStateFlow()
 
     fun startEditingUser(user: User) {
         _changingUserDetails.value = user
@@ -86,10 +84,6 @@ class UserViewModel(
     suspend fun saveUserToDatabase(user: User) {
             userRepository.addUser(user)
     }
-
-//    fun toggleSync(enabled: Boolean)
-//        _isSyncEnabled.value = !_isSyncEnabled.value
-//    }
 
     fun setSyncEnabled(enabled: Boolean) {
         viewModelScope.launch {
