@@ -6,15 +6,13 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
-    kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.googleServices)
 }
-
 
 android {
     namespace = "com.jobapplicationapp.jobby"
     compileSdk = 37
-
 
     defaultConfig {
         applicationId = "com.jobapplicationapp.jobby"
@@ -46,65 +44,61 @@ android {
     }
     kotlin {
         compilerOptions {
-            jvmTarget= JvmTarget.JVM_17
+            jvmTarget = JvmTarget.JVM_17
         }
     }
 }
 
 dependencies {
-    val nav_version = "2.9.8"
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.compose.ui.tooling.preview)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.runtime)
-    implementation("androidx.compose.ui:ui:1.6.8")
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.8")
-    implementation("androidx.compose.material3:material3:1.2.1")
-    implementation("androidx.compose.material:material-icons-extended:1.6.8")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.fonts)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.datastore.preferences)
+    debugImplementation(libs.compose.ui.tooling)
 
-    // Jetpack Compose integration
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-    // Views/Fragments integration
-    implementation("androidx.navigation:navigation-fragment:$nav_version")
-    implementation("androidx.navigation:navigation-ui:$nav_version")
-    // Feature module support for Fragments
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
-    // Testing Navigation
-    androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
-
+    // Jetpack Compose navigation
+    implementation(libs.navigation.compose)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
+    implementation(libs.navigation.dynamic)
+    androidTestImplementation(libs.navigation.testing)
 
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-    implementation("com.google.errorprone:error_prone_annotations:2.18.0")
+    implementation(libs.errorprone.annotations)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation(libs.firebase.analytics)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services)
+    implementation(libs.google.identity)
 
-    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation(libs.work.runtime.ktx)
 
     testImplementation(libs.junit)
-    testImplementation("com.google.truth:truth:1.4.5")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    testImplementation("app.cash.turbine:turbine:1.2.1")
-    testImplementation("org.mockito:mockito-core:5.11.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.0")
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 
 configurations.all {
