@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performScrollTo
 import com.jobapplicationapp.jobby.data.model.JobApplication
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
-import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import org.junit.Rule
 import org.junit.Test
 
@@ -53,7 +52,6 @@ class JobApplicationDetailsTest {
     )
 
     private fun createJobViewModel() = JobApplicationViewModel(DummyJobRepository()).apply { setUserId("1") }
-    private fun createUserViewModel() = UserViewModel(DummyUserRepository(), DummyJobRepository(), DummyUserPreferencesRepository()).apply { setUserId("1") }
 
 
 
@@ -85,12 +83,10 @@ class JobApplicationDetailsTest {
     @Test
     fun jobApplicationDetailsScreen_onDeleteIconClick_showDeleteDialog() {
         val jobViewModel = createJobViewModel().apply { selectJob(testJob1) }
-        val userViewModel = createUserViewModel()
         composeTestRule.setContent {
             AppTheme {
                 JobApplicationDetailsScreen(
-                    jobApplicationViewModel = jobViewModel,
-                    userViewModel = userViewModel
+                    jobApplicationViewModel = jobViewModel
                 )
             }
         }
@@ -150,7 +146,6 @@ class JobApplicationDetailsTest {
             AppTheme {
                 JobApplicationDetailsScreen(
                     jobApplicationViewModel = createJobViewModel(),
-                    userViewModel = createUserViewModel(),
                     onBackClick = { backTriggered = true }
                 )
             }
@@ -166,7 +161,6 @@ class JobApplicationDetailsTest {
             AppTheme {
                 JobApplicationDetailsScreen(
                     jobApplicationViewModel = createJobViewModel(),
-                    userViewModel = createUserViewModel(),
                     onDiscardClick = { discardTriggered = true }
                 )
             }
@@ -185,7 +179,6 @@ class JobApplicationDetailsTest {
             AppTheme {
                 JobApplicationDetailsScreen(
                     jobApplicationViewModel = viewModel,
-                    userViewModel = createUserViewModel(),
                     onSaveClick = { saveTriggered = true }
                 )
             }
@@ -205,7 +198,6 @@ class JobApplicationDetailsTest {
             AppTheme {
                 JobApplicationDetailsScreen(
                     jobApplicationViewModel = viewModel,
-                    userViewModel = createUserViewModel(),
                     onSaveClick = { saveTriggered = true }
                 )
             }
@@ -225,7 +217,6 @@ class JobApplicationDetailsTest {
             AppTheme {
                 JobApplicationDetailsScreen(
                     jobApplicationViewModel = jobViewModel,
-                    userViewModel = createUserViewModel(),
                     onConfirmDelete = { confirmDeleteTriggered = true }
                 )
             }
