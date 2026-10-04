@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /**
- * A repository for coordinates local (Room) and remote (Firestore) data sources.
- * It follows the Offline-First principle: UI to always reads from local data.
- * Changes are saved locally first, then synced to remote if enabled.
+ * A repository that coordinates local (Room) and remote (Firestore) data sources.
+ *
+ * Follows the Offline-First principle: the UI always reads from the local database.
+ * Changes are saved locally first and asynchronously synced to remote when sync is enabled.
  */
 class SyncJobApplicationRepository(
     private val localRepository: JobApplicationRepository,
@@ -30,6 +31,7 @@ class SyncJobApplicationRepository(
     // Internal state to track the active user for reactive syncing
     private val _currentUserId = MutableStateFlow<String?>(null)
 
+    // Kick off coroutine to watch for changes in sync setting when the repository is initialized (in app container)
     init {
         // Keep the local flag updated for synchronous add/delete operations
         externalScope.launch {
@@ -38,7 +40,7 @@ class SyncJobApplicationRepository(
             }
         }
 
-        // Centralized Sync Manager: watches for both User ID and Sync Setting
+        // Centralized Sync Manager: watches for both User ID and Sync Setting - with combine operator
         externalScope.launch {
             combine(_currentUserId, userPreferencesRepository.isSyncEnabled) { userId, enabled ->
                 userId to enabled
@@ -50,8 +52,18 @@ class SyncJobApplicationRepository(
         }
     }
 
+    /**
+     * Executes a centralized bidirectional synchronization cycle for [userId].
+     *
+     * 1. **PUSH**: Gathers all unsynced local records and pushes them to remote.
+     * 2. **PULL**: Fetches remote records and updates the local database.
+     *
+     * Uses [isSyncing] as a check to prevent overlapping sync cycles.
+     */
     private suspend fun runSyncCycle(userId: String) {
+        // Avoid multiple sync cycles running concurrently
         isSyncing = true
+
         try {
             Log.d(TAG, "Starting centralized sync cycle for user: $userId")
             // 1. PUSH local changes to remote
@@ -69,6 +81,7 @@ class SyncJobApplicationRepository(
         } catch (e: Exception) {
             Log.e(TAG, "Error during centralized sync cycle: ${e.message}", e)
         } finally {
+            // Reset sync flag after completion
             isSyncing = false
         }
     }

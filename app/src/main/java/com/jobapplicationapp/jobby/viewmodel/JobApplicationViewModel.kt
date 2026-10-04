@@ -24,9 +24,19 @@ class JobApplicationViewModel (
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    // .filterNotNull() to filter _userId to only emit non-null values
+    // .flatMapLatest to switch to a new flow whenever _userId changes
     private val _userJobApplications: Flow<List<JobApplication>> = _userId.filterNotNull().flatMapLatest {
         userId -> jobApplicationRepository.getAllJobApplications(userId)
     }
+
+    /**
+     * The primary UI state exposed to the UI layer.
+     *
+     * Combines the reactive job applications list with the current [SortOption],
+     * maps results to [JobApplicationUiState.Success] or [JobApplicationUiState.Error],
+     * and shares the stream efficiently using [stateIn] with a 5-second timeout.
+     */
     val uiState: StateFlow<JobApplicationUiState> = combine(
         _userJobApplications,
         _sortOption

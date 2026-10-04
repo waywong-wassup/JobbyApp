@@ -9,14 +9,17 @@ import kotlinx.coroutines.flow.first
 
 private const val TAG = "SyncWorker"
 
-/**
- * A worker that finds all unsynced local data and pushes it to Firebase.
- */
 class SyncWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
+    /**
+     * Executes background synchronization of unsynced job applications.
+     *
+     * Queries local records for the specified userId, filters for unsynced entries,
+     * and pushes them to the remote repository. Returns [Result.retry] if an error occurs.
+     */
     override suspend fun doWork(): Result {
         val app = applicationContext as JobbyApplication
         val userId = inputData.getString("userId") ?: return Result.failure()
