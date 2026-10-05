@@ -20,7 +20,7 @@ import androidx.navigation.toRoute
 import com.jobapplicationapp.jobby.JobbyApplication
 import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.model.User
-import com.jobapplicationapp.jobby.ui.components.BottomNavigationBar
+import com.jobapplicationapp.jobby.ui.components.AdaptiveNavigationSuiteScaffold
 import com.jobapplicationapp.jobby.ui.components.LoadingScreen
 import com.jobapplicationapp.jobby.ui.screens.JobApplicationDetailsScreen
 import com.jobapplicationapp.jobby.ui.screens.JobApplicationListScreen
@@ -112,11 +112,11 @@ fun JobbyAppNavHost(
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                BottomNavigationBar(
+
+
+                AdaptiveNavigationSuiteScaffold(
                     currentRoute = currentRoute,
+                    showNavigation = showBottomBar,
                     onNavigateToApplicationsScreen = {
                         navController.navigate(JobApplicationListScreenRoute) {
                             popUpTo(JobApplicationListScreenRoute) { saveState = true }
@@ -131,15 +131,11 @@ fun JobbyAppNavHost(
                             restoreState = true
                         }
                     }
-                )
-            }
-        },
-        contentWindowInsets = WindowInsets(0) //to remove the extra padding introduced by extra Scaffold
-    ) { innerPadding ->
+    ) {
         NavHost(
             navController = navController,
             startDestination = if (authUiState is AuthUiState.Success) JobApplicationListScreenRoute else StartScreenRoute, //initial launch destination
-            modifier = modifier.padding(innerPadding)
+            modifier = modifier
         ) {
             composable<StartScreenRoute> {
                 StartScreen(
