@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.compose.ui.fonts)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
+    implementation(libs.compose.material3.adaptive.navigation.suite)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.datastore.preferences)
     debugImplementation(libs.compose.ui.tooling)

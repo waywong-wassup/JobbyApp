@@ -84,6 +84,7 @@ import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserUiState
 import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import com.jobapplicationapp.jobby.data.model.SortOption
+import androidx.compose.ui.tooling.preview.Devices
 
 @Composable
 fun JobApplicationListScreen(
@@ -578,7 +579,16 @@ fun getProgressColor(progress: String): Pair<Color, Color> {
     }
 }
 
-@Preview(showBackground = true)
+/**
+ * Previews
+ */
+@Preview(name = "1. Phone", device = Devices.PHONE, showBackground = true)
+@Preview(name = "2. Foldable", device = Devices.FOLDABLE, showBackground = true)
+@Preview(name = "3. Tablet", device = Devices.TABLET, showBackground = true)
+@Preview(name = "4. Desktop", device = Devices.DESKTOP, showBackground = true)
+annotation class FormFactorPreviews
+
+//@Preview(showBackground = true)
 @Composable
 fun JobApplicationCardPreview() {
     AppTheme {
@@ -586,15 +596,18 @@ fun JobApplicationCardPreview() {
     }
 }
 
-@Preview(showBackground = true)
+//@Previews
 @Composable
 fun JobApplicationListPreview() {
     AppTheme {
-        JobApplicationList(jobApplications = JobApplication.sampleJobApplication, onEditClick = {})
+        JobApplicationList(
+            jobApplications = JobApplication.sampleJobApplication,
+            onEditClick = {}
+        )
     }
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 fun JobbyTopBarPreview() {
     AppTheme {
@@ -602,7 +615,7 @@ fun JobbyTopBarPreview() {
     }
 }
 
-@Preview(showBackground = true, heightDp = 600)
+@FormFactorPreviews
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember {
@@ -622,10 +635,18 @@ fun JobApplicationListScreenPreview() {
         }
     }
 
+    val dummyAuthViewModel = remember {
+        AuthViewModel(
+            authRepository = DummyAuthRepository()
+        )
+    }
+
     AppTheme {
         JobApplicationListScreen(
             jobApplicationViewModel = dummyJobViewModel,
-            userViewModel = dummyUserViewModel
+            userViewModel = dummyUserViewModel,
+            authViewModel = dummyAuthViewModel
         )
     }
 }
+

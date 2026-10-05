@@ -69,6 +69,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale.getDefault
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.jobapplicationapp.jobby.data.remote.AuthRepository
 import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository
 import com.jobapplicationapp.jobby.data.repository.UserRepository
@@ -77,8 +78,9 @@ import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-
-
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsScreen(
@@ -620,22 +622,41 @@ class DateTransformation : VisualTransformation {
 }
 
 
+/**
+ * Previews
+ * Dummy Repository for preview purpose
+ */
 class DummyJobRepository : JobApplicationRepository {
     override fun getAllJobApplications(userId: String) =
-        MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
-
+        MutableStateFlow(JobApplication.sampleJobApplication).asStateFlow()
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
-    override fun getJobApplicationById(id: String) = flowOf(null)
+    override fun getJobApplicationById(id: String) =
+        flowOf(JobApplication.sampleJobApplication.firstOrNull { it.jobApplicationId == id } ?: JobApplication.sampleJobApplication.first())
     override fun getUnsyncedJobApplications(userId: String) =
-       MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+        MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
 }
 
 class DummyUserRepository : UserRepository {
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
-    override fun getCurrentUser(userId: String) = flowOf(null)
+    override fun getCurrentUser(userId: String) = flowOf(User.sampleUser)
+}
+
+class DummyAuthRepository : AuthRepository {
+    override val currentUser: Flow<FirebaseUser?> = flowOf(null)
+    override suspend fun signInWithEmailAndPassword(email: String, password: String): Result<Unit> =
+        Result.success(Unit)
+    override suspend fun signUpWithEmailAndPassword(
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String
+    ): Result<Unit> = Result.success(Unit)
+    override suspend fun signOut() {}
+    override suspend fun signInWithGoogle(idToken: String): Result<Unit> =
+        Result.success(Unit)
 }
 
 class DummyUserPreferencesRepository : UserPreferencesRepository {
