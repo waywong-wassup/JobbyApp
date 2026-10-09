@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -148,6 +150,7 @@ fun JobApplicationListScreen(
                 Column(modifier = Modifier.padding(
                     top = innerPadding.calculateTopPadding()
                     )
+                    .fillMaxSize()
                     )
                 {
                     Row(
@@ -352,7 +355,8 @@ fun JobApplicationList(
     onEditClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ){
-    LazyColumn(
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 340.dp),
         modifier = modifier
             .fillMaxSize(),
         contentPadding = PaddingValues(
@@ -361,9 +365,12 @@ fun JobApplicationList(
             top = 8.dp,
             bottom = 16.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp) // for bigger display
     ) {
-        items(jobApplications.size) { i ->
+        items(jobApplications.size,
+            key = { i -> jobApplications[i].jobApplicationId },
+            ) { i ->
             JobApplicationCard(
                 jobApplication = jobApplications[i],
                 onEditClick = { onEditClick(jobApplications[i].jobApplicationId) }
