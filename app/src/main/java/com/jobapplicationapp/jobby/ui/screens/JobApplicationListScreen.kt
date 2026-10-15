@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -108,6 +111,7 @@ fun JobApplicationListScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
             JobbyTopBar(user = user, onEditUserDetailsClick = {
@@ -244,16 +248,16 @@ fun JobbyAppUserName(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = "${user.firstName} ${user.lastName}",
+                text = "Hi ${user.firstName} ${user.lastName}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = modifier
             )
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -274,7 +278,7 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
                     text = "Jobby",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         },
@@ -282,7 +286,7 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
             JobbyAppUserName(user = user, onEditUserDetailsClick = onEditUserDetailsClick)
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.surface,
         )
     )
 }
@@ -355,6 +359,8 @@ fun JobApplicationList(
     onEditClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ){
+    val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
+
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 340.dp),
         modifier = modifier
@@ -363,7 +369,7 @@ fun JobApplicationList(
             start = 16.dp,
             end = 16.dp,
             top = 8.dp,
-            bottom = 16.dp
+            bottom = navBarPadding.calculateBottomPadding() + 80.dp
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp) // for bigger display

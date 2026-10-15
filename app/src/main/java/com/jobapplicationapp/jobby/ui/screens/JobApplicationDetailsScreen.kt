@@ -86,6 +86,7 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
+    showBackNavigation: Boolean = true,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
@@ -139,6 +140,7 @@ fun JobApplicationDetailsScreen(
     Scaffold(
         topBar = {
             JobApplicationDetailsTopBar(
+                showBackNavigation = showBackNavigation,
                 onBackClick = onBackClick,
                 onDeleteIconClick = {
                     showDeleteDialog = true
@@ -189,6 +191,7 @@ fun JobApplicationDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsTopBar(
+    showBackNavigation: Boolean = true,
     onBackClick: () -> Unit = {},
     onDeleteIconClick: () -> Unit = {}
 ) {
@@ -198,20 +201,22 @@ fun JobApplicationDetailsTopBar(
                 text = stringResource(R.string.job_application_details),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back_to_list),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+            if (showBackNavigation) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back_to_list),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         actions = {
             IconButton(onClick = { onDeleteIconClick() }
@@ -220,7 +225,7 @@ fun JobApplicationDetailsTopBar(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

@@ -141,10 +141,13 @@ fun SummaryScreen(
                     val salaries = jobs.mapNotNull { it.salary }.filter { it > 0 }
 
                     LazyColumn(
-                        modifier = modifier
-                            .padding(innerPadding)
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
+                        modifier = modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            top = innerPadding.calculateTopPadding() + 16.dp,
+                            bottom = innerPadding.calculateBottomPadding() + 16.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
 //                        item {

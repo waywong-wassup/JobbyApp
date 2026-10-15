@@ -22,6 +22,7 @@ import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.model.User
 import com.jobapplicationapp.jobby.ui.components.AdaptiveNavigationSuiteScaffold
 import com.jobapplicationapp.jobby.ui.components.LoadingScreen
+import com.jobapplicationapp.jobby.ui.screens.JobApplicationAdaptiveScreen
 import com.jobapplicationapp.jobby.ui.screens.JobApplicationDetailsScreen
 import com.jobapplicationapp.jobby.ui.screens.JobApplicationListScreen
 import com.jobapplicationapp.jobby.ui.screens.StartScreen
@@ -37,10 +38,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 object StartScreenRoute
+
 @Serializable
 object JobApplicationListScreenRoute
+
 @Serializable
-data class JobApplicationDetailsScreenRoute (val id: String)
+data class JobApplicationDetailsScreenRoute(val id: String)
+
 @Serializable
 object SummaryScreenRoute
 
@@ -82,10 +86,11 @@ fun JobbyAppNavHost(
                 User(
                     userId = uid,
                     firstName = user.displayName?.substringBefore(" ") ?: "New",
-                    lastName = user.displayName?.substringAfter(" ", "")?.ifBlank { "User" } ?: "User"
+                    lastName = user.displayName?.substringAfter(" ", "")?.ifBlank { "User" }
+                        ?: "User"
                 )
             )
-            
+
             // Only navigate if we are on the start screen to avoid duplicate screens
             if (navController.currentDestination?.route?.contains("StartScreenRoute") == true) {
                 navController.navigate(JobApplicationListScreenRoute) {
@@ -104,8 +109,9 @@ fun JobbyAppNavHost(
     LaunchedEffect(localUserUiState) {
         // If we found a local user (either Guest or Firebase) and we are currently on the Start screen
         if (localUserUiState is UserUiState.Success &&
-            navController.currentDestination?.route?.contains("StartScreenRoute") == true) {
-            
+            navController.currentDestination?.route?.contains("StartScreenRoute") == true
+        ) {
+
             navController.navigate(JobApplicationListScreenRoute) {
                 popUpTo(StartScreenRoute) { inclusive = true }
             }
@@ -114,23 +120,23 @@ fun JobbyAppNavHost(
 
 
 
-                AdaptiveNavigationSuiteScaffold(
-                    currentRoute = currentRoute,
-                    showNavigation = showBottomBar,
-                    onNavigateToApplicationsScreen = {
-                        navController.navigate(JobApplicationListScreenRoute) {
-                            popUpTo(JobApplicationListScreenRoute) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    onNavigateToSummaryScreen = {
-                        navController.navigate(SummaryScreenRoute) {
-                            popUpTo(JobApplicationListScreenRoute) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+    AdaptiveNavigationSuiteScaffold(
+        currentRoute = currentRoute,
+        showNavigation = showBottomBar,
+        onNavigateToApplicationsScreen = {
+            navController.navigate(JobApplicationListScreenRoute) {
+                popUpTo(JobApplicationListScreenRoute) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        },
+        onNavigateToSummaryScreen = {
+            navController.navigate(SummaryScreenRoute) {
+                popUpTo(JobApplicationListScreenRoute) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
     ) {
         NavHost(
             navController = navController,
@@ -166,21 +172,38 @@ fun JobbyAppNavHost(
                     }
                 )
             }
+            @OptIn(androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi::class)
             composable<JobApplicationListScreenRoute> {
-                JobApplicationListScreen(
-                    jobApplicationViewModel = jobApplicationViewModel,
-                    userViewModel = userViewModel,
-                    onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
-                    onAddClick = {
-                        navController.navigate(JobApplicationDetailsScreenRoute("0"))
-                    },
-                    onLogout = {
-                        navController.navigate(StartScreenRoute) {
-                            popUpTo(JobApplicationListScreenRoute) { inclusive = true }
+                val adaptiveInfo = androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2()
+                val isLargeScreen = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(600)
+
+                if (isLargeScreen) {
+                    JobApplicationAdaptiveScreen(
+                        jobApplicationViewModel = jobApplicationViewModel,
+                        userViewModel = userViewModel,
+                        onLogout = {
+                            navController.navigate(StartScreenRoute) {
+                                popUpTo(JobApplicationListScreenRoute) { inclusive = true }
+                            }
                         }
-                    }
-                )
+                    )
+                } else {
+                    JobApplicationListScreen(
+                        jobApplicationViewModel = jobApplicationViewModel,
+                        userViewModel = userViewModel,
+                        onEditClick = { id -> navController.navigate(JobApplicationDetailsScreenRoute(id)) },
+                        onAddClick = {
+                            navController.navigate(JobApplicationDetailsScreenRoute("0"))
+                        },
+                        onLogout = {
+                            navController.navigate(StartScreenRoute) {
+                                popUpTo(JobApplicationListScreenRoute) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
+
             composable<JobApplicationDetailsScreenRoute> { backStack ->
                 val details: JobApplicationDetailsScreenRoute = backStack.toRoute()
 
