@@ -89,7 +89,8 @@ fun JobApplicationAdaptiveScreen(
                         },
                         onAddClick = {
                             scope.launch {
-                                navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, "0")
+                                val uniqueNewId = "0_${System.currentTimeMillis()}" // to ensure unique id for each new application for new button logic
+                                navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, uniqueNewId)
                             }
                         },
                         onLogout = onLogout
@@ -126,7 +127,15 @@ fun JobApplicationAdaptiveScreen(
                                 onBackClick = handleBack,
                                 onDiscardClick = handleBack,
                                 onSaveClick = handleBack,
-                                onConfirmDelete = handleBack
+                                onConfirmDelete = {
+                                    scope.launch {
+                                        if (navigator.canNavigateBack()) {
+                                            navigator.navigateBack()
+                                        } else {
+                                            navigator.navigateTo(ListDetailPaneScaffoldRole.List)
+                                        }
+                                    }
+                                }
                             )
                         }
                     }

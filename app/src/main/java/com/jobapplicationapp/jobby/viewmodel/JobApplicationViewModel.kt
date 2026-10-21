@@ -85,6 +85,7 @@ class JobApplicationViewModel (
         try {
             if (job != null) {
                 deleteJobApplication(job)
+                _changingJobApplication.value = null // clear the current changing job state
             }
         }
         catch (e: Exception) {
@@ -111,7 +112,7 @@ class JobApplicationViewModel (
 
     fun loadJobApplication(id: String) {
         // id = "0" if add new job
-        if(id == "0"){
+        if(id == "0" || id.startsWith("0_")){
             _changingJobApplication.value = JobApplication(
                 userId = _userId.value ?: OFFLINE_USER_ID,
                 jobTitle = "",
