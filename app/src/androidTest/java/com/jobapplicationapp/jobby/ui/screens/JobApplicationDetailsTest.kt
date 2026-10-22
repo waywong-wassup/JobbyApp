@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.jobapplicationapp.jobby.data.model.JobApplication
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyJobRepository
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import org.junit.Rule

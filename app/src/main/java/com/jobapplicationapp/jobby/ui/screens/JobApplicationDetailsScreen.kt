@@ -55,10 +55,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
 import com.jobapplicationapp.jobby.data.model.JobApplication
 import com.jobapplicationapp.jobby.data.model.Progress
-import com.jobapplicationapp.jobby.data.model.User
 import com.jobapplicationapp.jobby.ui.components.DeleteConfirmationDialog
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
-import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import androidx.compose.material3.DatePicker
 import androidx.compose.ui.text.AnnotatedString
@@ -69,14 +67,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale.getDefault
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
-import com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository
-import com.jobapplicationapp.jobby.data.repository.UserRepository
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyJobRepository
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyUserPreferencesRepository
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyUserRepository
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -617,31 +612,6 @@ class DateTransformation : VisualTransformation {
 
         return TransformedText(AnnotatedString(out), offsetMapping)
     }
-}
-
-
-class DummyJobRepository : JobApplicationRepository {
-    override fun getAllJobApplications(userId: String) =
-        MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
-
-    override suspend fun addJobApplication(job: JobApplication) {}
-    override suspend fun updateJobApplication(job: JobApplication) {}
-    override suspend fun deleteJobApplication(job: JobApplication) {}
-    override fun getJobApplicationById(id: String) = flowOf(null)
-    override fun getUnsyncedJobApplications(userId: String) =
-       MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
-}
-
-class DummyUserRepository : UserRepository {
-    override suspend fun deleteUser(user: User) {}
-    override suspend fun addUser(user: User) {}
-    override fun getCurrentUser(userId: String) = flowOf(null)
-}
-
-class DummyUserPreferencesRepository : UserPreferencesRepository {
-    override val isSyncEnabled: Flow<Boolean> = flowOf(false)
-
-    override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
 }
 
 @Preview(showBackground = true)

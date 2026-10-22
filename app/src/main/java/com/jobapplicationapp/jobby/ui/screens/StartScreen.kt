@@ -43,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.jobapplicationapp.jobby.R
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyAuthRepository
 import com.jobapplicationapp.jobby.ui.theme.AppTheme
 import com.jobapplicationapp.jobby.viewmodel.AppViewModelProvider
 import com.jobapplicationapp.jobby.viewmodel.AuthViewModel
@@ -301,7 +302,8 @@ fun LoginGoogleAccountField(
 @Preview(showBackground = true)
 @Composable
 fun StartScreenPreview() {
+    val dummyAuthViewModel = remember { AuthViewModel(DummyAuthRepository()) }
     AppTheme {
-        StartScreen()
+        StartScreen(authViewModel = dummyAuthViewModel)
     }
 }

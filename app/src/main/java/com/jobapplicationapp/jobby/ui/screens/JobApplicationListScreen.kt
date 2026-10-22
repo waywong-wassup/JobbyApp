@@ -68,6 +68,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jobapplicationapp.jobby.R
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyAuthRepository
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyJobRepository
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyUserPreferencesRepository
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyUserRepository
 import com.jobapplicationapp.jobby.data.model.JobApplication
 import com.jobapplicationapp.jobby.data.model.OFFLINE_USER_ID
 import com.jobapplicationapp.jobby.data.model.User
@@ -607,25 +611,27 @@ fun JobbyTopBarPreview() {
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember {
         JobApplicationViewModel(
-            DummyJobRepository()
+            DummyJobRepository(JobApplication.sampleJobApplication)
         ).apply {
             setUserId("1")
         }
     }
     val dummyUserViewModel = remember {
         UserViewModel(
-            userRepository = DummyUserRepository(),
-            jobApplicationRepository = DummyJobRepository(),
+            userRepository = DummyUserRepository(User.sampleUser),
+            jobApplicationRepository = DummyJobRepository(JobApplication.sampleJobApplication),
             userPreferencesRepository = DummyUserPreferencesRepository()
         ).apply {
             setUserId("1")
         }
     }
+    val dummyAuthViewModel = remember { AuthViewModel(DummyAuthRepository()) }
 
     AppTheme {
         JobApplicationListScreen(
             jobApplicationViewModel = dummyJobViewModel,
-            userViewModel = dummyUserViewModel
+            userViewModel = dummyUserViewModel,
+            authViewModel = dummyAuthViewModel
         )
     }
 }
