@@ -113,10 +113,12 @@ fun JobApplicationAdaptiveScreen(
                             }
 
                             val isSinglePane = navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Hidden
-                            val handleBack: () -> Unit = {
+                            val handleBackInAdaptiveMode: () -> Unit = {
                                 scope.launch {
                                     if (navigator.canNavigateBack()) {
                                         navigator.navigateBack()
+                                    }else {
+                                        navigator.navigateTo(ListDetailPaneScaffoldRole.List)
                                     }
                                 }
                             }
@@ -124,18 +126,10 @@ fun JobApplicationAdaptiveScreen(
                             JobApplicationDetailsScreen(
                                 jobApplicationViewModel = jobApplicationViewModel,
                                 showBackNavigation = isSinglePane,
-                                onBackClick = handleBack,
-                                onDiscardClick = handleBack,
-                                onSaveClick = handleBack,
-                                onConfirmDelete = {
-                                    scope.launch {
-                                        if (navigator.canNavigateBack()) {
-                                            navigator.navigateBack()
-                                        } else {
-                                            navigator.navigateTo(ListDetailPaneScaffoldRole.List)
-                                        }
-                                    }
-                                }
+                                onBackClick = handleBackInAdaptiveMode,
+                                onDiscardClick = handleBackInAdaptiveMode,
+                                onSaveClick = handleBackInAdaptiveMode,
+                                onConfirmDelete = handleBackInAdaptiveMode
                             )
                         }
                     }
