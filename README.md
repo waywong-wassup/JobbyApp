@@ -34,9 +34,12 @@ May you land your job faster than I do !!!
 
 ## 📸 Screenshots
 
-| Start Screen | List Screen | Details Screen | Summary Screen |
-| :---: | :---: | :---: | :---: |
-|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1b71a622-6460-4ebe-b460-da7869c447c8" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/49f47ce3-333b-4907-a66c-dd948997eaf9" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/40ddfd2a-e543-4554-874b-8abc2db51cd1" />
+|| Start Screen | List Screen | Details Screen | Summary Screen |
+|:---:| :---: | :---: | :---: | :---: |
+|Mobile|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1b71a622-6460-4ebe-b460-da7869c447c8" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/49f47ce3-333b-4907-a66c-dd948997eaf9" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/40ddfd2a-e543-4554-874b-8abc2db51cd1" />
+|Foldables/Tablet|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/5c321618-3e15-44dc-a501-30157f35d382" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/6aaafdb5-8dc8-4369-951c-de796b8b56fc" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/55c4ea86-d5d7-4cfb-8f38-d309e5a95a8a" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/919c9ccb-780c-4cfc-b1ce-7d639e841a99" />|
+
+
 
 ## 🛠 Tech Stack
 
