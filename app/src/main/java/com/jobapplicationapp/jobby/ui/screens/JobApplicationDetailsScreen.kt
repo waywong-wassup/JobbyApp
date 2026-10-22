@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -69,6 +70,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import java.util.Locale.getDefault
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.jobapplicationapp.jobby.data.remote.AuthRepository
 import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository
 import com.jobapplicationapp.jobby.data.repository.UserRepository
@@ -77,12 +79,14 @@ import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-
-
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsScreen(
     jobApplicationViewModel: JobApplicationViewModel,
+    showBackNavigation: Boolean = true,
     onBackClick: () -> Unit = {},
     onDiscardClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
@@ -136,6 +140,7 @@ fun JobApplicationDetailsScreen(
     Scaffold(
         topBar = {
             JobApplicationDetailsTopBar(
+                showBackNavigation = showBackNavigation,
                 onBackClick = onBackClick,
                 onDeleteIconClick = {
                     showDeleteDialog = true
@@ -186,6 +191,7 @@ fun JobApplicationDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JobApplicationDetailsTopBar(
+    showBackNavigation: Boolean = true,
     onBackClick: () -> Unit = {},
     onDeleteIconClick: () -> Unit = {}
 ) {
@@ -195,20 +201,22 @@ fun JobApplicationDetailsTopBar(
                 text = stringResource(R.string.job_application_details),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back_to_list),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+            if (showBackNavigation) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back_to_list),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         actions = {
             IconButton(onClick = { onDeleteIconClick() }
@@ -217,7 +225,7 @@ fun JobApplicationDetailsTopBar(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -230,6 +238,7 @@ fun JobApplicationDetailsBottomBar(
     onSaveClick: () -> Unit = {}
 ) {
     Surface(
+        modifier = Modifier.navigationBarsPadding()
     ) {
         Row(
             modifier = Modifier
@@ -620,22 +629,41 @@ class DateTransformation : VisualTransformation {
 }
 
 
+/**
+ * Previews
+ * Dummy Repository for preview purpose
+ */
 class DummyJobRepository : JobApplicationRepository {
     override fun getAllJobApplications(userId: String) =
-        MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
-
+        MutableStateFlow(JobApplication.sampleJobApplication).asStateFlow()
     override suspend fun addJobApplication(job: JobApplication) {}
     override suspend fun updateJobApplication(job: JobApplication) {}
     override suspend fun deleteJobApplication(job: JobApplication) {}
-    override fun getJobApplicationById(id: String) = flowOf(null)
+    override fun getJobApplicationById(id: String) =
+        flowOf(JobApplication.sampleJobApplication.firstOrNull { it.jobApplicationId == id } ?: JobApplication.sampleJobApplication.first())
     override fun getUnsyncedJobApplications(userId: String) =
-       MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
+        MutableStateFlow(emptyList<JobApplication>()).asStateFlow()
 }
 
 class DummyUserRepository : UserRepository {
     override suspend fun deleteUser(user: User) {}
     override suspend fun addUser(user: User) {}
-    override fun getCurrentUser(userId: String) = flowOf(null)
+    override fun getCurrentUser(userId: String) = flowOf(User.sampleUser)
+}
+
+class DummyAuthRepository : AuthRepository {
+    override val currentUser: Flow<FirebaseUser?> = flowOf(null)
+    override suspend fun signInWithEmailAndPassword(email: String, password: String): Result<Unit> =
+        Result.success(Unit)
+    override suspend fun signUpWithEmailAndPassword(
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String
+    ): Result<Unit> = Result.success(Unit)
+    override suspend fun signOut() {}
+    override suspend fun signInWithGoogle(idToken: String): Result<Unit> =
+        Result.success(Unit)
 }
 
 class DummyUserPreferencesRepository : UserPreferencesRepository {
