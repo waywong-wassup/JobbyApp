@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -88,6 +93,7 @@ import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserUiState
 import com.jobapplicationapp.jobby.viewmodel.UserViewModel
 import com.jobapplicationapp.jobby.data.model.SortOption
+import androidx.compose.ui.tooling.preview.Devices
 
 @Composable
 fun JobApplicationListScreen(
@@ -109,6 +115,7 @@ fun JobApplicationListScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             val user = (userUiState as? UserUiState.Success)?.user ?: User.guestUser
             JobbyTopBar(user = user, onEditUserDetailsClick = {
@@ -151,6 +158,7 @@ fun JobApplicationListScreen(
                 Column(modifier = Modifier.padding(
                     top = innerPadding.calculateTopPadding()
                     )
+                    .fillMaxSize()
                     )
                 {
                     Row(
@@ -244,16 +252,16 @@ fun JobbyAppUserName(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = "${user.firstName} ${user.lastName}",
+                text = "Hi ${user.firstName} ${user.lastName}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = modifier
             )
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -274,7 +282,7 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
                     text = "Jobby",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         },
@@ -282,7 +290,7 @@ fun JobbyTopBar(user: User, onEditUserDetailsClick: () -> Unit = {}) {
             JobbyAppUserName(user = user, onEditUserDetailsClick = onEditUserDetailsClick)
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.surface,
         )
     )
 }
@@ -355,18 +363,24 @@ fun JobApplicationList(
     onEditClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ){
-    LazyColumn(
+    val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 340.dp),
         modifier = modifier
             .fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
             top = 8.dp,
-            bottom = 16.dp
+            bottom = navBarPadding.calculateBottomPadding() + 80.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp) // for bigger display
     ) {
-        items(jobApplications.size) { i ->
+        items(jobApplications.size,
+            key = { i -> jobApplications[i].jobApplicationId },
+            ) { i ->
             JobApplicationCard(
                 jobApplication = jobApplications[i],
                 onEditClick = { onEditClick(jobApplications[i].jobApplicationId) }
@@ -582,7 +596,16 @@ fun getProgressColor(progress: String): Pair<Color, Color> {
     }
 }
 
-@Preview(showBackground = true)
+/**
+ * Previews
+ */
+@Preview(name = "1. Phone", device = Devices.PHONE, showBackground = true)
+@Preview(name = "2. Foldable", device = Devices.FOLDABLE, showBackground = true)
+@Preview(name = "3. Tablet", device = Devices.TABLET, showBackground = true)
+@Preview(name = "4. Desktop", device = Devices.DESKTOP, showBackground = true)
+annotation class FormFactorPreviews
+
+//@Preview(showBackground = true)
 @Composable
 fun JobApplicationCardPreview() {
     AppTheme {
@@ -590,15 +613,18 @@ fun JobApplicationCardPreview() {
     }
 }
 
-@Preview(showBackground = true)
+//@Previews
 @Composable
 fun JobApplicationListPreview() {
     AppTheme {
-        JobApplicationList(jobApplications = JobApplication.sampleJobApplication, onEditClick = {})
+        JobApplicationList(
+            jobApplications = JobApplication.sampleJobApplication,
+            onEditClick = {}
+        )
     }
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 fun JobbyTopBarPreview() {
     AppTheme {
@@ -606,7 +632,7 @@ fun JobbyTopBarPreview() {
     }
 }
 
-@Preview(showBackground = true, heightDp = 600)
+@FormFactorPreviews
 @Composable
 fun JobApplicationListScreenPreview() {
     val dummyJobViewModel = remember {
@@ -627,6 +653,12 @@ fun JobApplicationListScreenPreview() {
     }
     val dummyAuthViewModel = remember { AuthViewModel(DummyAuthRepository()) }
 
+    val dummyAuthViewModel = remember {
+        AuthViewModel(
+            authRepository = DummyAuthRepository()
+        )
+    }
+
     AppTheme {
         JobApplicationListScreen(
             jobApplicationViewModel = dummyJobViewModel,
@@ -635,3 +667,4 @@ fun JobApplicationListScreenPreview() {
         )
     }
 }
+

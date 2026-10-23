@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    id("kotlin-parcelize")
     alias(libs.plugins.googleServices)
 }
 
@@ -63,6 +64,10 @@ dependencies {
     implementation(libs.compose.ui.fonts)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
+    implementation(libs.compose.material3.adaptive.navigation.suite)
+    implementation(libs.compose.material3.adaptive)
+    implementation(libs.compose.material3.adaptive.layout)
+    implementation(libs.compose.material3.adaptive.navigation)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.datastore.preferences)
     debugImplementation(libs.compose.ui.tooling)
