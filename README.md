@@ -36,7 +36,7 @@ May you land your job faster than I do !!!
 
 || Start Screen | List Screen | Details Screen | Summary Screen |
 |:---:| :---: | :---: | :---: | :---: |
-|Mobile|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1b71a622-6460-4ebe-b460-da7869c447c8" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/49f47ce3-333b-4907-a66c-dd948997eaf9" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/40ddfd2a-e543-4554-874b-8abc2db51cd1" />
+|Mobile|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/93eb0688-a849-44d2-b89b-aec4b7e4f0c4" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/be628d79-59ea-42e4-9354-e99ba9370201" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1d4cfe6f-b121-475b-9d7f-d86174f48e73" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/3dd0f251-f9eb-4a8d-9b82-55b2791febc1" />|
 |Foldables/Tablet|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/5c321618-3e15-44dc-a501-30157f35d382" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/6aaafdb5-8dc8-4369-951c-de796b8b56fc" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/55c4ea86-d5d7-4cfb-8f38-d309e5a95a8a" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/919c9ccb-780c-4cfc-b1ce-7d639e841a99" />|
 
 
@@ -59,14 +59,8 @@ May you land your job faster than I do !!!
 
 Jobby follows the **Offline-First** architecture. The UI always reads from the local Room database, ensuring the app is always fast and responsive. A "Sync" layer and background `SyncWorker` handle pushing local updates to Firestore when a network connection is available.
 
-```mermaid
-graph TD
-    UI[Compose UI] --> VM[ViewModel]
-    VM --> Repository[Sync Repository]
-    Repository --> Room[Room Database]
-    Repository --> Firestore[Firebase Firestore]
-    WorkManager[WorkManager / SyncWorker] --> Repository
-```
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/7e4cf802-f775-4cee-bb7a-7f0a3e4868fd" />
+
 
 ## 🏁 Getting Started
 
