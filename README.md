@@ -3,7 +3,7 @@ Losing track of all the jobs you have applied?!
 
 <img width="180" height="170" alt="image" src="https://github.com/user-attachments/assets/1decc69d-71d9-43ea-b33b-e90d2e9abdf5" />
 
-**Jobby** is a modern, offline-first Android application designed to be your ultimate job search buddy. Built with Jetpack Compose and Firebase, it helps you organise your job hunt by tracking applications, interviews, and offers in one centralised place.
+**Jobby** is a modern, offline-first Android application designed to be your ultimate job search buddy. Built with Jetpack Compose and Firebase, it helps you organise your job hunt by tracking applications, interviews, and offers in one centralized place.
 
 <img width="150" height="150" alt="Screenshot 2026-08-18 221358" src="https://github.com/user-attachments/assets/51c8db0b-fda5-4990-8a23-dc5979e205d8" />
 
@@ -20,7 +20,9 @@ May you land your job faster than I do !!!
 *   **Authentication Options:** 
     *   **Google Sign-In:** Modern, one-tap sign-in using the **Android Credential Manager API**.
     *   **Email/Password:** Traditional secure login and sign-up via Firebase Auth.
-*   **Smart Cloud Sync:** Intelligent two-way synchronization that automatically pushes unsynced data upon login or app launch.
+*   **Smart Cloud Sync & WorkManager:** Intelligent two-way synchronization using **WorkManager** (`SyncWorker`) to automatically push unsynced data upon login, app launch, or background tasks.
+*   **Search & Sorting:** Easily search job applications by company, title, location, or status, with customizable sorting options.
+*   **Summary & Insights:** Quick dashboard overview of job application metrics (Applied, Interview, Offered, Rejected, Ghosted).
 *   **Persistent Preferences:** Remembers your settings (like Sync status) even after app restarts using **Jetpack DataStore**.
 *   **Guest Mode:** Start tracking jobs immediately without an account; your data is saved locally and can be synced later.
 *   **Comprehensive Tracking:** Manage detailed job information including:
@@ -28,13 +30,14 @@ May you land your job faster than I do !!!
     *   Application Status (To Apply, Applied, Interview, Offered, etc.)
     *   Salary, Location, and Application URLs
     *   Contact Information & Custom Notes
-*   **Modern UI:** A clean, reactive interface built entirely with **Jetpack Compose** and **Material 3**.
+*   **Modern UI & Adaptive Layouts:** A clean, reactive interface built entirely with **Jetpack Compose** and **Material 3**, adapting fluidly across various screen sizes and device orientations.
 
 ## 📸 Screenshots
 
-| Start Screen | List Screen | Details Screen | Summary Screen |
-| :---: | :---: | :---: | :---: |
-|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/e1b2e6c2-d347-4c69-958c-bd7639d058c2" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1b71a622-6460-4ebe-b460-da7869c447c8" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/49f47ce3-333b-4907-a66c-dd948997eaf9" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/40ddfd2a-e543-4554-874b-8abc2db51cd1" />
+|| Start Screen | List Screen | Details Screen | Summary Screen |
+|:---:| :---: | :---: | :---: | :---: |
+|Mobile|<img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/93eb0688-a849-44d2-b89b-aec4b7e4f0c4" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/be628d79-59ea-42e4-9354-e99ba9370201" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/1d4cfe6f-b121-475b-9d7f-d86174f48e73" />| <img width="181" height="404" alt="image" src="https://github.com/user-attachments/assets/3dd0f251-f9eb-4a8d-9b82-55b2791febc1" />|
+|Foldables/Tablet|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/5c321618-3e15-44dc-a501-30157f35d382" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/6aaafdb5-8dc8-4369-951c-de796b8b56fc" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/55c4ea86-d5d7-4cfb-8f38-d309e5a95a8a" />|<img width="830" height="860" alt="image" src="https://github.com/user-attachments/assets/919c9ccb-780c-4cfc-b1ce-7d639e841a99" />|
 
 
 
@@ -42,25 +45,22 @@ May you land your job faster than I do !!!
 
 *   **Language:** [Kotlin](https://kotlinlang.org/)
 *   **UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) (Material 3)
-*   **Database (Local):** [Room](https://developer.android.com/training/data-storage/room)
+*   **Database (Local):** [Room](https://developer.android.com/training/data-storage/room) (via KSP)
 *   **Persistence:** [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) (Preferences)
+*   **Background Tasks:** [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) (`SyncWorker`)
 *   **Identity:** [Credential Manager API](https://developer.android.com/training/sign-in/credential-manager)
 *   **Backend:** [Firebase](https://firebase.google.com/) (Auth, Firestore, Analytics)
 *   **Architecture:** MVVM + Repository Pattern + Offline-First Sync Logic
 *   **Navigation:** Jetpack Navigation Compose (Type-safe routes)
 *   **Concurrency:** Kotlin Coroutines & Flow
+*   **Testing & Previews:** JUnit 4, Google Truth, Turbine, Mockito, Compose UI Test Framework, and reusable preview data layer (`dummyRepository`).
 
 ## 🏗 Architecture
 
-Jobby follows the **Offline-First** architecture. The UI always reads from the local Room database, ensuring the app is always fast and responsive. A "Sync" layer sits between the local and remote repositories, handling the logic of pushing updates to Firestore when a connection is available.
+Jobby follows the **Offline-First** architecture. The UI always reads from the local Room database, ensuring the app is always fast and responsive. A "Sync" layer and background `SyncWorker` handle pushing local updates to Firestore when a network connection is available.
 
-```mermaid
-graph TD
-    UI[Compose UI] --> VM[ViewModel]
-    VM --> Repository[Sync Repository]
-    Repository --> Room[Room Database]
-    Repository --> Firestore[Firebase Firestore]
-```
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/7e4cf802-f775-4cee-bb7a-7f0a3e4868fd" />
+
 
 ## 🏁 Getting Started
 
@@ -75,7 +75,7 @@ graph TD
     ```
 2.  **Add Firebase:**
     *   Create an Android app in your Firebase Console.
-    *   Download the `google-services.json` and place it in the `app/` directory.
+    *   Download `google-services.json` and place it in the `app/` directory.
     *   Enable **Email/Password**, **Google**, and **Anonymous** Authentication in the Firebase Console.
     *   Enable **Cloud Firestore**.
 3.  **Add Configuration:**
@@ -85,10 +85,7 @@ graph TD
 4.  **Build & Run:**
     *   Sync Gradle and run the app on your emulator or physical device.
 
-
-
 ## 🔜 WIP and Upcoming Features
 * <s>Better Detail screen experience </s> DONE
-* Filter and Sorting job lists
+* <s>Filter and Sorting job lists </s> DONE
 * <s>Summary and stats, a glance of how many jobs have rejected/ghosted you. </s> DONE
-

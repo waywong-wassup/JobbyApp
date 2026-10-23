@@ -10,8 +10,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.jobapplicationapp.jobby.data.model.JobApplication
-import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import com.jobapplicationapp.jobby.data.model.User
+import com.jobapplicationapp.jobby.data.dummyRepository.DummyUserPreferencesRepository
+import com.jobapplicationapp.jobby.data.repository.JobApplicationRepository
 import com.jobapplicationapp.jobby.data.repository.UserRepository
 import com.jobapplicationapp.jobby.viewmodel.JobApplicationViewModel
 import com.jobapplicationapp.jobby.viewmodel.UserViewModel
@@ -159,9 +160,4 @@ class JobbyAppNavHostTest {
         assert(route?.contains("JobApplicationListScreenRoute") == true)
         composeTestRule.onNodeWithText(testJob.jobTitle).assertDoesNotExist()
     }
-}
-
-class DummyUserPreferencesRepository : com.jobapplicationapp.jobby.data.repository.UserPreferencesRepository {
-    override val isSyncEnabled: kotlinx.coroutines.flow.Flow<Boolean> = flowOf(false)
-    override suspend fun setIsSyncEnabled(isSyncEnabled: Boolean) {}
 }
